@@ -1,7 +1,10 @@
 import pandas as pd
 from sqlalchemy import create_engine
 
-def readStudents():
+#==================
+# READING FUNCTIONS
+#==================
+def readStudentsDF():
     db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
     db_connection = create_engine(db_connection_str)
 
@@ -9,55 +12,46 @@ def readStudents():
 
     return df
 
+def readProgramsDF():
+    db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
+    db_connection = create_engine(db_connection_str)
+
+    df = pd.read_sql('SELECT * FROM programs', con=db_connection)
+
+    return df
+
+def readCollegesDF():
+    db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
+    db_connection = create_engine(db_connection_str)
+
+    df = pd.read_sql('SELECT * FROM colleges', con=db_connection)
+
+    return df
+#==================
+# READING FUNCTIONS
+#==================
 
 
 
-
-# #==================
-# # READING FUNCTIONS
-# #==================
-# def readStudentsDF():
-#     Students = pd.read_csv(r'DATA\Students.csv')
-#     StudentsDF = pd.DataFrame(Students)
-#     # print(StudentsDF)
-#     return StudentsDF
- 
-# def readProgramsDF():
-#     Programs = pd.read_csv(r'DATA\Programs.csv')
-#     ProgramsDF = pd.DataFrame(Programs)
-#     # print(ProgramsDF)
-#     return ProgramsDF
-
-# def readCollegesDF():
-#     Colleges = pd.read_csv(r'DATA\Colleges.csv')
-#     CollegesDF = pd.DataFrame(Colleges)
-#     # print(CollegesDF)
-#     return CollegesDF
-# #==================
-# # READING FUNCTIONS
-# #==================
-
-
-
-# #==================
-# # UPDATE FUNCTIONS
-# #==================
-# def updateDF(dataframe):
+#==================
+# UPDATE FUNCTIONS
+#==================
+def updateDF(dataframe):
     
-#     match(dataframe.columns[0]):
-#             case(r"ID"):
-#                 newdataframe = readStudentsDF()
+    match(dataframe.columns[0]):
+            case(r"ID Number"):
+                newdataframe = readStudentsDF()
 
-#             case(r"Program Code"):
-#                 newdataframe = readProgramsDF()
+            case(r"Program Code"):
+                newdataframe = readProgramsDF()
 
-#             case(r"College Code"):
-#                 newdataframe = readCollegesDF()
+            case(r"College Code"):
+                newdataframe = readCollegesDF()
     
-#     return newdataframe
-# #==================
-# # UPDATE FUNCTIONS
-# #==================
+    return newdataframe
+#==================
+# UPDATE FUNCTIONS
+#==================
 
 
 

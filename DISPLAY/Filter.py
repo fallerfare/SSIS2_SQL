@@ -4,29 +4,27 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 class Filter():
-    def __init__(self, root, table):
+    def __init__(self, root, dataframe, table):
         self.root = root
-        self.dataframe = GlobalDFs.readStudents()
+        self.dataframe = GlobalDFs.updateDF(dataframe)
         self.table = table
+        self.columns = self.dataframe.columns
 
-        self.searchnsortframe = ttk.Frame(root)
-        self.searchnsortframe.pack(anchor="center")
+        self.searchlabel = ttk.Label(self.root, text="Search", font=('Arial', 12))
+        self.searchbylabel = ttk.Label(self.root, text="by: ", font=('Arial', 12))
+        self.sortwithlabel = ttk.Label(self.root, text="Sort with", font=('Arial', 12))
+        self.sortbylabel = ttk.Label(self.root, text="Sort by", font=('Arial', 12))
 
-        self.searchlabel = ttk.Label(self.searchnsortframe, text="Search", font=('Arial', 12))
-        self.searchbylabel = ttk.Label(self.searchnsortframe, text="by: ", font=('Arial', 12))
-        self.sortwithlabel = ttk.Label(self.searchnsortframe, text="Sort with", font=('Arial', 12))
-        self.sortbylabel = ttk.Label(self.searchnsortframe, text="Sort by", font=('Arial', 12))
-
-        self.searchbar = ttk.Entry(self.searchnsortframe, font=('Arial', 9), width=20)
-        self.searchbychoose = ttk.Combobox(self.searchnsortframe, state="readonly",
+        self.searchbar = ttk.Entry(self.root, font=('Arial', 9), width=20)
+        self.searchbychoose = ttk.Combobox(self.root, state="readonly",
                                          values=list(self.dataframe.columns),
                                         width=15)
 
-        self.sortwithbar = ttk.Combobox(self.searchnsortframe, state="readonly",
+        self.sortwithbar = ttk.Combobox(self.root, state="readonly",
                                         values=list(self.dataframe.columns),
                                         width=15)
 
-        self.sortbybar = ttk.Combobox(self.searchnsortframe, state="readonly",
+        self.sortbybar = ttk.Combobox(self.root, state="readonly",
                                       values=["Ascending", "Descending"],
                                       width=15)
 
@@ -46,30 +44,53 @@ class Filter():
 
     def perform_searchandsort(self, event):
 
-        db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
-        db_connection = create_engine(db_connection_str)
-
         self.search_term = self.searchbar.get().strip().lower()
         self.search_type = self.searchbychoose.get().strip()
         self.sortwithkey = self.sortwithbar.get().strip()
         self.sortbykey = self.sortbybar.get().strip()
 
+        # db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
+        # db_connection = create_engine(db_connection_str)
+
+        # self.basequery = "SELECT * FROM students "
+        # self.searchquery = ""
+        # self.sortquery = ""
+        # self.params = ()
+
         if self.dataframe.empty:
             return
 
+        # # Filtering logic
+        # if self.search_term:
+        #     if self.search_type:
+        #         self.searchquery = f"WHERE `{self.search_type}` LIKE %s"
+        #         self.params = (f"%{self.search_term}%", )
+        #     else: 
+        #         self.searchquery = f"WHERE ("
+        #         for column in self.columns:
+        #             self.searchquery += f"`{column}` LIKE %s"
+        #             self.params = (f"%{self.search_term}%", )
+        #         self.searchquery += f")"
+                
+        # self.query = self.basequery + self.searchquery + self.sortquery
+        # print(self.query)
+        # df = pd.read_sql(self.query, con=db_connection, params = tuple(self.params))
+
         # Filtering logic
+
+        self.filtered_df = GlobalDFs.readStudentsDF()
+
         if self.search_term:
             if self.search_type:
-                query = "SELECT * FROM students WHERE " + self.search_type + " = " + self.search_term
-
+                self.filtered_df = self.filtered_df[self.filtered_df[self.search_type].astype(str)
+                    .str.lower().str.contains(self.search_term, na=False)]
             else:
-                query = "SELECT * FROM students WHERE " + self.search_type + " = " + self.search_term
-
-        df = pd.read_sql(query, con=db_connection)
+                mask = self.filtered_df.astype(str).apply(lambda row: row.str.lower().str.contains(self.search_term), axis=1)
+                self.filtered_df = self.filtered_df[mask.any(axis=1)]
 
         # Sorting logic
         if self.sortwithkey and self.sortbykey:
             ascending = self.sortbykey == "Ascending"
-            self.dataframe = self.dataframe.sort_values(by=[self.sortwithkey], ascending=ascending)
+            self.filtered_df = self.filtered_df.sort_values(by=[self.sortwithkey], ascending=ascending)
 
-        self.table.PopulateTable(self.table.tree)
+        self.table.PopulateTable(self.table.tree, self.filtered_df)

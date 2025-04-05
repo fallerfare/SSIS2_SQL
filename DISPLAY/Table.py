@@ -5,18 +5,16 @@ from DATA import GlobalDFs
 #     DYNAMIC TABLE, ADD ANY DATAFRAME
 # ==========================================
 class Table():
-        def __init__(self, root):
+        def __init__(self, root, dataframe):
                 self.root = root
-                self.dataframe = GlobalDFs.readStudents()
-                self.tableframe = ttk.Frame(self.root)
-                self.tableframe.pack(padx = 15, pady = 10)
+                self.dataframe = GlobalDFs.updateDF(dataframe)
 
                 # Scrollbar
-                self.treeScroll = ttk.Scrollbar(self.tableframe)
+                self.treeScroll = ttk.Scrollbar(self.root)
                 self.treeScroll.pack(side="right", fill='y', anchor="center")
 
                 # Treeview
-                self.tree = ttk.Treeview(self.tableframe,  selectmode =        "browse", 
+                self.tree = ttk.Treeview(self.root,  selectmode =        "browse", 
                                                 show =              'headings', 
                                                 yscrollcommand =    self.treeScroll.set, 
                                                 style =             "Treeview"
@@ -35,7 +33,7 @@ class Table():
         def PopulateTable(self, tree, dataframe):
                 # Clear table
                 self.dataframe = dataframe
-                print("Populating")
+                # print("Populating")
                 for row in self.tree.get_children():
                         self.tree.delete(row)
 

@@ -1,7 +1,7 @@
 from tkinter import ttk
 import tkinter as tk
-from DISPLAY.Table import Table
-from DISPLAY.Filter import Filter
+from DISPLAY.Repo import Repo
+from DATA import GlobalDFs
 import TKinterModernThemes as TKMT
 
 # =======================
@@ -26,8 +26,17 @@ if __name__ =="__main__":
         Title = ttk.Label(HeaderFrame, text="MSU - IIT Students Repository", font=('Arial', 15), anchor = "center", background = "maroon", width = 800)
         Title.pack(padx = 15, pady = 10)
 
-        studentTable = Table(window.root)
-        studentFilter = Filter(window.root, studentTable)
+        # Tabs
+        notebook = ttk.Notebook(window.root)
+        notebook.pack(padx = 35, pady = 35, anchor= "center")
+
+        Students = Repo(notebook, notebook, GlobalDFs.readStudentsDF()) # Students Tab
+        Programs = Repo(notebook, notebook, GlobalDFs.readProgramsDF()) # Programs Tab
+        Colleges = Repo(notebook, notebook, GlobalDFs.readCollegesDF()) # Colleges Tab
+
+        notebook.add(Students.returnFrame(), text="Students")
+        notebook.add(Programs.returnFrame(), text="Programs")
+        notebook.add(Colleges.returnFrame(), text="Colleges")
 
         window.root.mainloop()
 # =======================
