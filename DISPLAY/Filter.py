@@ -1,10 +1,12 @@
 from tkinter import ttk
 from DATA import GlobalDFs
+from sqlalchemy import create_engine
+import pandas as pd
 
 class Filter():
-    def __init__(self, root, dataframe, table):
+    def __init__(self, root, table):
         self.root = root
-        self.dataframe = GlobalDFs.updateDF(dataframe)
+        self.dataframe = GlobalDFs.readStudents()
         self.table = table
 
         self.searchnsortframe = ttk.Frame(root)
@@ -42,31 +44,32 @@ class Filter():
         self.sortbylabel.grid(row=0, column=6)
         self.sortbybar.grid(row=0, column=7)
 
-        self.filtered_df = self.table.dataframe = GlobalDFs.updateDF(self.table.dataframe)  # Ensure table has updated dataframe
-
     def perform_searchandsort(self, event):
+
+        db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
+        db_connection = create_engine(db_connection_str)
+
         self.search_term = self.searchbar.get().strip().lower()
         self.search_type = self.searchbychoose.get().strip()
         self.sortwithkey = self.sortwithbar.get().strip()
         self.sortbykey = self.sortbybar.get().strip()
 
-        self.filtered_df = GlobalDFs.updateDF(self.table.dataframe)  # Ensure table has updated dataframe
-
-        if self.filtered_df.empty:
+        if self.dataframe.empty:
             return
 
         # Filtering logic
         if self.search_term:
             if self.search_type:
-                self.filtered_df = self.filtered_df[self.filtered_df[self.search_type].astype(str)
-                    .str.lower().str.contains(self.search_term, na=False)]
+                query = "SELECT * FROM students WHERE " + self.search_type + " = " + self.search_term
+
             else:
-                mask = self.filtered_df.astype(str).apply(lambda row: row.str.lower().str.contains(self.search_term), axis=1)
-                self.filtered_df = self.filtered_df[mask.any(axis=1)]
+                query = "SELECT * FROM students WHERE " + self.search_type + " = " + self.search_term
+
+        df = pd.read_sql(query, con=db_connection)
 
         # Sorting logic
         if self.sortwithkey and self.sortbykey:
             ascending = self.sortbykey == "Ascending"
-            self.filtered_df = self.filtered_df.sort_values(by=[self.sortwithkey], ascending=ascending)
+            self.dataframe = self.dataframe.sort_values(by=[self.sortwithkey], ascending=ascending)
 
-        self.table.Populate(self.table.tree, self.filtered_df, "Filter")
+        self.table.PopulateTable(self.table.tree)

@@ -5,17 +5,18 @@ from DATA import GlobalDFs
 #     DYNAMIC TABLE, ADD ANY DATAFRAME
 # ==========================================
 class Table():
-        def __init__(self, root, dataframe, notebook):
+        def __init__(self, root):
                 self.root = root
-                self.dataframe = GlobalDFs.updateDF(dataframe)
-                self.notebook = notebook
+                self.dataframe = GlobalDFs.readStudents()
+                self.tableframe = ttk.Frame(self.root)
+                self.tableframe.pack(padx = 15, pady = 10)
 
                 # Scrollbar
-                self.treeScroll = ttk.Scrollbar(root)
+                self.treeScroll = ttk.Scrollbar(self.tableframe)
                 self.treeScroll.pack(side="right", fill='y', anchor="center")
 
                 # Treeview
-                self.tree = ttk.Treeview(root,  selectmode =        "browse", 
+                self.tree = ttk.Treeview(self.tableframe,  selectmode =        "browse", 
                                                 show =              'headings', 
                                                 yscrollcommand =    self.treeScroll.set, 
                                                 style =             "Treeview"
@@ -26,34 +27,26 @@ class Table():
                         self.tree.heading(col, text = col)
                         self.tree.column(col, width = 100, anchor = 'center')
 
-                self.Populate(self.tree, self.dataframe, "Update")
 
-                self.tree.pack(side="left", fill="both", anchor = "center", expand=True)
-                self.treeScroll.config(command=self.tree.yview)
-
-        # Separate populating function to be accessed by other functions
-        def Populate(self, tree, dataframe, source):
-                self.dataframe = dataframe
                 self.tree.tag_configure('evenrow', background="#9ce3ff")
 
+                self.PopulateTable(self.tree, self.dataframe)
+
+        def PopulateTable(self, tree, dataframe):
                 # Clear table
+                self.dataframe = dataframe
+                print("Populating")
                 for row in self.tree.get_children():
                         self.tree.delete(row)
 
-                if(source == "Filter"):
-                        for index, row in dataframe.iterrows():
-                                if index % 2 == 0:
-                                        tree.insert("", "end", values=list(row), tags=('evenrow', ))
-                                else:
-                                        tree.insert("", "end", values=list(row), tags=('oddrow', ))
+                for index, row in self.dataframe.iterrows():
+                        if index % 2 == 0:
+                                self.tree.insert("", "end", values=list(row), tags=('evenrow', ))
+                        else:
+                                self.tree.insert("", "end", values=list(row), tags=('oddrow', ))
 
-                if(source == "Update"):
-                        self.dataframe = GlobalDFs.updateDF(self.dataframe)
-                        for index, row in self.dataframe.iterrows():
-                                if index % 2 == 0:
-                                        tree.insert("", "end", values=list(row), tags=('evenrow', ))
-                                else:
-                                        tree.insert("", "end", values=list(row), tags=('oddrow', ))
+                self.tree.pack(side="left", fill="both", anchor = "center", expand=True)
+                self.treeScroll.config(command=self.tree.yview)                                                                                                                                                                         
 # ==========================================
 #     DYNAMIC TABLE, ADD ANY DATAFRAME
 # ==========================================
