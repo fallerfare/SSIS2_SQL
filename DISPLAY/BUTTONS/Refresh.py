@@ -14,7 +14,7 @@ class Refresh:
         self.Button = ttk.Button(self.root, text="Refresh", command=self.refresh)
 
     def refresh(self):
-        self.table.Populate(self.table.tree, GlobalDFs.updateDF(self.table.dataframe), "Update")
+        self.table.PopulateTable(self.table.tree, GlobalDFs.updateDF(self.table.dataframe))
 # =====================
 #    REFRESH BUTTON
 # =====================

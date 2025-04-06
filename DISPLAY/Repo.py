@@ -36,7 +36,7 @@ class Repo:
         # Create items
         self.table = Table(self.tablepane, self.dataframe)
         self.search = Filter(self.searchpane, self.dataframe, self.table)
-        # self.button = Buttons(self.buttonframe, self.dataframe, self.table)
+        self.button = Buttons(self.buttonframe, self.dataframe, self.table)
 
         self.table.dataframe = GlobalDFs.updateDF(self.table.dataframe)
 

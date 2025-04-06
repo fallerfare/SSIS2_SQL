@@ -14,7 +14,7 @@ class Edit:
 
         # Format Add Button according to tab
         match dataframe.columns[0]:  
-            case "ID":
+            case "ID Number":
                 command = lambda: SignUp.SignUpWindow(self.table, "Edit")
                 buttext = "Edit Student"
             case "Program Code":

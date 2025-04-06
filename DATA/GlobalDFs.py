@@ -56,26 +56,6 @@ def updateDF(dataframe):
 
 
 # #==================
-# # WRITING FUNCTIONS
-# #==================
-# def writeStudentsDF(newStudentdf):
-
-#     newStudentdf.to_csv('DATA/Students.csv', mode='w', header=True, index=False)
-
-# def writeProgramsDF(newProgramdf):
-
-#     newProgramdf.to_csv('DATA/Programs.csv', mode='w', header=True, index=False)
-
-# def writeCollegesDF(newCollegedf):
-
-#     newCollegedf.to_csv('DATA/Colleges.csv', mode='w', header=True, index=False)
-# #==================
-# # WRITING FUNCTIONS
-# #==================
-
-
-
-# #==================
 # # APPENDING FUNCTIONS
 # #==================
 # def appendStudentsDF(newStudentdf):

@@ -15,7 +15,7 @@ class Add:
 
         # Format Add Button according to tab
         match dataframe.columns[0]:  
-            case "ID":
+            case "ID Number":
                 command = lambda: SignUp.SignUpWindow(self.table, "Add")
                 buttext = "Enroll New"
             case "Program Code":

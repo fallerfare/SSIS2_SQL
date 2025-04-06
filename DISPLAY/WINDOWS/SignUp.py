@@ -3,6 +3,7 @@ import pandas as pd
 import tkinter as tk
 from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
+from sqlalchemy import create_engine, insert, update, Table, MetaData
 
 # ===================
 #   STUDENT WINDOW
@@ -30,6 +31,7 @@ class SignUpWindow:
         # ================
 
 
+
         # ================
         # WIDGETS
 
@@ -48,24 +50,24 @@ class SignUpWindow:
 
         # Autofilled for Edit
         if self.WinType == "Edit":
-            self.IDVar = tk.StringVar(value=self.item_values[0])
-            self.FirstNameVar = tk.StringVar(value=self.item_values[1])
-            self.LastNameVar = tk.StringVar(value=self.item_values[2])
-            self.EmailVar = tk.StringVar(value=self.item_values[3])
-            self.YearVar = tk.StringVar(value=self.item_values[4])
-            self.GenderVar = tk.StringVar(value=self.item_values[5]) 
-            self.ProgramVar = tk.StringVar(value=self.item_values[6])
-            self.CollegeVar = tk.StringVar(value=self.item_values[7])
+            self.IDVar          = tk.StringVar(value=self.item_values[0])
+            self.FirstNameVar   = tk.StringVar(value=self.item_values[1])
+            self.LastNameVar    = tk.StringVar(value=self.item_values[2])
+            self.EmailVar       = tk.StringVar(value=self.item_values[3])
+            self.YearVar        = tk.StringVar(value=self.item_values[4])
+            self.GenderVar      = tk.StringVar(value=self.item_values[5]) 
+            self.ProgramVar     = tk.StringVar(value=self.item_values[6])
+            self.CollegeVar     = tk.StringVar(value=self.item_values[7])
             
         else:
-            self.FirstNameVar = tk.StringVar()
-            self.LastNameVar = tk.StringVar()
-            self.EmailVar = tk.StringVar()
-            self.IDVar = tk.StringVar()
-            self.CollegeVar = tk.StringVar()
-            self.ProgramVar = tk.StringVar()
-            self.YearVar = tk.StringVar()
-            self.GenderVar = tk.StringVar()
+            self.FirstNameVar   = tk.StringVar()
+            self.LastNameVar    = tk.StringVar()
+            self.EmailVar       = tk.StringVar()
+            self.IDVar          = tk.StringVar()
+            self.CollegeVar     = tk.StringVar()
+            self.ProgramVar     = tk.StringVar()
+            self.YearVar        = tk.StringVar()
+            self.GenderVar      = tk.StringVar()
 
         # Entry Boxes
         self.FirstNameEntryBox  = ttk.Entry(self.frame, width=35,                       font=('Arial', 9), textvariable=self.FirstNameVar)
@@ -74,8 +76,8 @@ class SignUpWindow:
         self.IDEntryBox         = ttk.Entry(self.frame, width=35,                       font=('Arial', 9), textvariable=self.IDVar)
 
         # Dropdowns
-        self.collegechoices = list(GlobalDFs.readCollegesDF()['College Code'])
-        self.programchoices = []
+        self.collegechoices     = list(GlobalDFs.readCollegesDF()['College Code'])
+        self.programchoices     = []
 
         def collegechosen(event):
             College = self.CollegeEntryBox.get()
@@ -109,6 +111,7 @@ class SignUpWindow:
         # Buttons
         if self.WinType == "Add":
             self.SignUpButton   = ttk.Button(self.frame, text="Enroll",         command=self.SignUp)
+        
         elif self.WinType == "Edit":
             self.SignUpButton   = ttk.Button(self.frame, text="Confirm Edit",   command=self.SignUp)
 
@@ -165,22 +168,28 @@ class SignUpWindow:
     # SIGNUP   
 
     def SignUp(self):
+        
+        self.db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
+        self.db_connection          = create_engine(self.db_connection_str).connect()
+        self.metadata               = MetaData()
+        self.studentsTable          = Table('students', self.metadata, autoload_with=self.db_connection)
+
         try:
 
             # Get and clean entries
-            ID_number = self.IDEntryBox.get().strip()
-            first_name = self.FirstNameEntryBox.get().strip()
-            last_name = self.LastNameEntryBox.get().strip()
-            email = self.EmailEntryBox.get().strip()
-            year_level = self.YearEntryBox.get().strip()
-            gender = self.GenderEntryBox.get().strip()
-            program_code = self.ProgramEntryBox.get().strip()
-            college_code = self.CollegeEntryBox.get().strip()
+            ID_number       = self.IDEntryBox.get().strip()
+            first_name      = self.FirstNameEntryBox.get().strip()
+            last_name       = self.LastNameEntryBox.get().strip()
+            email           = self.EmailEntryBox.get().strip()
+            year_level      = self.YearEntryBox.get().strip()
+            gender          = self.GenderEntryBox.get().strip()
+            program_code    = self.ProgramEntryBox.get().strip()
+            college_code    = self.CollegeEntryBox.get().strip()
             # Get and clean entries
 
             # Check entries' formats
             Exceptions.validate_inputs({
-                    "ID"            : (ID_number,Exceptions.IDEntry),
+                    "ID Number"     : (ID_number,Exceptions.IDEntry),
                     "First Name"    : (first_name, Exceptions.NormalEntry),
                     "Last Name"     : (last_name, Exceptions.NormalEntry),
                     "Email"         : (email,Exceptions.EmailEntry),
@@ -193,53 +202,49 @@ class SignUpWindow:
 
             # If window was called by ADD Button
             if(self.WinType == "Add"):
-                Exceptions.validate_studentduplicates(ID_number)
+                # Exceptions.validate_studentduplicates(ID_number)
 
-                newStudentdata = {
-                    'ID'            : [ID_number],
-                    'First Name'    : [first_name],
-                    'Last Name'     : [last_name],
-                    'Email'         : [email],
-                    'Year Level'    : [year_level],
-                    'Gender'        : [gender],
-                    'Program Code'  : [program_code],
-                    'College Code'  : [college_code]
-                }
+                newStudent = insert(self.studentsTable).values(
+                    **{
+                        "ID Number"     : f"{ID_number}",
+                        "First Name"    : f"{first_name}",
+                        "Last Name"     : f"{last_name}",
+                        "Email"         : f"{email}",
+                        "Year Level"    : f"{year_level}",
+                        "Gender"        : f"{gender}",
+                        "Program Code"  : f"{program_code}",
+                        "College Code"  : f"{college_code}"
+                    }
+                )
 
-                newStudentdf = pd.DataFrame(newStudentdata)
-                newdataframe = pd.concat([GlobalDFs.readStudentsDF(), newStudentdf], ignore_index=True)
-                # Rewrite dataframe
-
+                self.db_connection.execute(newStudent)             
             # If window was called by ADD Button
 
             # If window was called by EDIT Button
             elif(self.WinType == "Edit"):
                 selected_item = self.table.tree.selection()
                 item_values = self.table.tree.item(selected_item, "values")
-                new_item_values = list(item_values)
-                old_ID_number = new_item_values[0]
+                old_ID_number = item_values[0]
 
-                Exceptions.validate_studentduplicates(ID_number, edit = True, currentstudent = old_ID_number)
+                # Exceptions.validate_studentduplicates(ID_number, edit = True, currentstudent = old_ID_number)
 
+                editStudent = update(self.studentsTable).where(self.studentsTable.c["ID Number"] == old_ID_number).values(
+                    **{
+                        "ID Number"     : f"{ID_number}",
+                        "First Name"    : f"{first_name}",
+                        "Last Name"     : f"{last_name}",
+                        "Email"         : f"{email}",
+                        "Year Level"    : f"{year_level}",
+                        "Gender"        : f"{gender}",
+                        "Program Code"  : f"{program_code}",
+                        "College Code"  : f"{college_code}"
+                    }
+                )
+            
+                self.db_connection.execute(editStudent)
 
-                new_item_values[0] = ID_number
-                new_item_values[1] = first_name
-                new_item_values[2] = last_name
-                new_item_values[3] = email
-                new_item_values[4] = year_level  
-                new_item_values[5] = gender     
-                new_item_values[6] = program_code
-                new_item_values[7] = college_code
-
-                newdataframe = GlobalDFs.readStudentsDF()
-
-                selected_row_index = list(newdataframe.index[newdataframe['ID'] == item_values[0]])
-                newdataframe.loc[selected_row_index[0]] = new_item_values
-                # Rewrite dataframe
-               
-            GlobalDFs.writeStudentsDF(newdataframe)
-            self.table.Populate(self.table.tree, newdataframe, "Update")
-            # Close 
+            self.db_connection.commit()
+            self.table.PopulateTable(self.table.tree, self.table.dataframe)
             self.root.destroy()
 
         except ValueError as ve:

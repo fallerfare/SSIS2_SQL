@@ -47,7 +47,7 @@ def validate_studentduplicates(duplicatekey, edit=False, currentstudent=None):
     Students = GlobalDFs.readStudentsDF()
     
     if edit and currentstudent:  
-        students_tovalidatedupe = Students[Students['ID'] != currentstudent]
+        students_tovalidatedupe = Students[Students['ID Number'] != currentstudent]
     else:
         students_tovalidatedupe = Students
 

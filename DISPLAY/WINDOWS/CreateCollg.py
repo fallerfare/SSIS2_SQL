@@ -5,12 +5,11 @@ from DATA import GlobalDFs, GlobalHash
 from EXCEPTIONS import Exceptions
 
 class CreateCollgWindow:
-    def __init__(self, table, Wintype, ProgramsTab = None):
+    def __init__(self, table, Wintype):
         self.table = table
         self.selectedtab = self.table.tree.selection()
         self.item_values = self.table.tree.item(self.selectedtab, "values")
         self.WinType = Wintype
-        self.ProgramsTab = ProgramsTab
 
         self.root = tk.Toplevel()
         self.root.geometry("900x400")
@@ -117,7 +116,7 @@ class CreateCollgWindow:
                 GlobalHash.updateConstituents(old_college_code, college_code)
 
             GlobalDFs.writeCollegesDF(newdataframe)
-            self.table.Populate(self.table.tree, newdataframe, "Update")    
+            self.table.PopulateTable(self.table.tree, newdataframe)    
             self.root.destroy()
 
         except ValueError as ve:
