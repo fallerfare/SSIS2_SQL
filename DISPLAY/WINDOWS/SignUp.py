@@ -1,5 +1,4 @@
 from tkinter import ttk
-import pandas as pd
 import tkinter as tk
 from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
@@ -10,20 +9,20 @@ from sqlalchemy import create_engine, insert, update, Table, MetaData
 # ===================
 class SignUpWindow:
     def __init__(self, table, Wintype):
-        self.table = table
-        self.selectedtab = self.table.tree.selection()
-        self.item_values = self.table.tree.item(self.selectedtab, "values")
-        self.WinType = Wintype
+        self.table          = table
+        self.selectedtab    = self.table.tree.selection()
+        self.item_values    = self.table.tree.item(self.selectedtab, "values")
+        self.WinType        = Wintype
 
         # ================
         # MAIN WINDOW
         
-        self.root = tk.Toplevel()
-        self.root.geometry("900x400")
+        self.root           = tk.Toplevel()
+        self.root.geometry( "900x400")
         self.root.resizable(width=False, height=False)
-        self.frame = ttk.Frame(self.root)
-        self.frame.pack(padx=20, pady=20, anchor="center")
-        self.root.grab_set() 
+        self.frame          = ttk.Frame(self.root)
+        self.frame.pack(    padx=20, pady=20, anchor="center")
+        self.root.grab_set( ) 
         self.root.focus_set()  
         self.root.transient() 
 
@@ -244,7 +243,7 @@ class SignUpWindow:
                 self.db_connection.execute(editStudent)
 
             self.db_connection.commit()
-            self.table.PopulateTable(self.table.tree, self.table.dataframe)
+            self.table.PopulateTable(self.table.tree, GlobalDFs.readStudentsDF())
             self.root.destroy()
 
         except ValueError as ve:

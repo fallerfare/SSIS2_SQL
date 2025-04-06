@@ -1,8 +1,8 @@
 from DATA import GlobalDFs
 
 def StudentHash(dataframe):
-    dataframe = dataframe.drop_duplicates(subset=["ID"])
-    return dataframe.set_index("ID").to_dict(orient="index")
+    dataframe = dataframe.drop_duplicates(subset=["ID Number"])
+    return dataframe.set_index("ID Number").to_dict(orient="index")
 
 def ProgramsHash(dataframe):
     dataframe = dataframe.drop_duplicates(subset=["Program Code"])

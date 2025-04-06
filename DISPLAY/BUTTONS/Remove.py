@@ -62,21 +62,23 @@ class Remove:
         match self.column_name:
             case "ID Number":
                 # Remove the row
-                self.removeAct = delete(self.studentsTable).where(self.studentsTable.c["ID Number"] == self.removekey)
-            # case "Program Code":
-            #     try:
-            #         Exceptions.validate_programremove(self.removekey)
-            #         # Remove the row
-            #         self.removeAct = delete(self.programsTable).where(self.programsTable.c["Program Code"] == self.removekey)
-            #     except PermissionError as pe:
-            #         Exceptions.show_removeerror_message(pe)
-            # case "College Code":
-            #     try:
-            #         Exceptions.validate_collegeremove(self.removekey)
-            #         # Remove the row
-            #         self.removeAct = delete(self.collegesTable).where(self.programsTable.c["College Code"] == self.removekey)
-            #     except PermissionError as pe:
-            #         Exceptions.show_removeerror_message(pe)
+                self.removeAct      = delete(self.studentsTable).where(self.studentsTable.c["ID Number"] == self.removekey)
+                
+            case "Program Code":
+                try:
+                    Exceptions.validate_programremove(self.removekey)
+                    # Remove the row
+                    self.removeAct  = delete(self.programsTable).where(self.programsTable.c["Program Code"] == self.removekey)
+                except PermissionError as pe:
+                    Exceptions.show_removeerror_message(pe)
+
+            case "College Code":
+                try:
+                    Exceptions.validate_collegeremove(self.removekey)
+                    # Remove the row
+                    self.removeAct  = delete(self.collegesTable).where(self.programsTable.c["College Code"] == self.removekey)
+                except PermissionError as pe:
+                    Exceptions.show_removeerror_message(pe)
                 
         self.db_connection.execute(self.removeAct)
         self.db_connection.commit()
