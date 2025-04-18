@@ -1,40 +1,12 @@
 from DATA import GlobalDFs
+from sqlalchemy import create_engine, Table, MetaData, select
 
-def StudentHash(dataframe):
-    dataframe = dataframe.drop_duplicates(subset=["ID Number"])
-    return dataframe.set_index("ID Number").to_dict(orient="index")
-
-def ProgramsHash(dataframe):
-    dataframe = dataframe.drop_duplicates(subset=["Program Code"])
-    return dataframe.set_index("Program Code").to_dict(orient="index")
-
-def CollegesHash(dataframe):
-    dataframe = dataframe.drop_duplicates(subset=["College Code"])
-    return dataframe.set_index("College Code").to_dict(orient="index")
-
-def showEnrolled(programcode):
-    Students = StudentHash(GlobalDFs.readStudentsDF())
-    EnrolledStudents = []
-    for student_id in Students:
-        student_info = Students[student_id]
-        if student_info["Program Code"] == programcode:
-            EnrolledStudents.append(student_id)
-    return EnrolledStudents
-
-def showDegrees(collegecode):
-    Programs = ProgramsHash(GlobalDFs.readProgramsDF())
-    EstablishedDegrees = []
-    for program_code in Programs:
-        program_info = Programs[program_code]
-        if program_info["College Code"] == collegecode:
-            EstablishedDegrees.append(program_code)
-    return EstablishedDegrees
-
-def showConstituents(collegecode):
-    Constituents = []
-    for program in showDegrees(collegecode):
-        Constituents.append(showEnrolled(program))
-    return Constituents
+db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
+db_connection          = create_engine(db_connection_str).connect()
+metadata               = MetaData()
+collegesTable          = Table('colleges', metadata, autoload_with=db_connection)
+programsTable          = Table('programs', metadata, autoload_with=db_connection)
+studentsTable          = Table('students', metadata, autoload_with=db_connection)
 
 def updateStudents(oldprogramcode, programcode):
     Students = GlobalDFs.readStudentsDF()

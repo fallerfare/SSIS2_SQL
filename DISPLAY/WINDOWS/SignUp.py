@@ -3,6 +3,7 @@ import tkinter as tk
 from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
 from sqlalchemy import create_engine, insert, update, Table, MetaData
+from pymysql.err import IntegrityError
 
 # ===================
 #   STUDENT WINDOW
@@ -199,6 +200,9 @@ class SignUpWindow:
             })
             # Check entries' formats
 
+            Exceptions.validate_studentduplicates(ID_number)
+
+
             # If window was called by ADD Button
             if(self.WinType == "Add"):
                 # Exceptions.validate_studentduplicates(ID_number)
@@ -248,8 +252,6 @@ class SignUpWindow:
 
         except ValueError as ve:
             Exceptions.show_inputerror_message(ve)
-        except FileExistsError as fe:
-            Exceptions.show_duplicateerror_message(fe)
         except Exception as e:
             Exceptions.show_unexpected_error(e)
 

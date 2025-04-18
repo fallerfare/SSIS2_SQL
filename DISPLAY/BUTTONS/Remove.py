@@ -66,7 +66,7 @@ class Remove:
                 
             case "Program Code":
                 try:
-                    Exceptions.validate_programremove(self.removekey)
+                    Exceptions.constraint_enrolled_program(self.removekey)
                     # Remove the row
                     self.removeAct  = delete(self.programsTable).where(self.programsTable.c["Program Code"] == self.removekey)
                 except PermissionError as pe:
@@ -74,7 +74,7 @@ class Remove:
 
             case "College Code":
                 try:
-                    Exceptions.validate_collegeremove(self.removekey)
+                    Exceptions.constraint_enrolled_college(self.removekey)
                     # Remove the row
                     self.removeAct  = delete(self.collegesTable).where(self.programsTable.c["College Code"] == self.removekey)
                 except PermissionError as pe:

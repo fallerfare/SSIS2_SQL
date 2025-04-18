@@ -1,8 +1,13 @@
 from tkinter import messagebox
-from DATA import GlobalHash, GlobalDFs
 import re
+from sqlalchemy import create_engine, Table, MetaData, select
 
-
+db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
+db_connection          = create_engine(db_connection_str).connect()
+metadata               = MetaData()
+collegesTable          = Table('colleges', metadata, autoload_with=db_connection)
+programsTable          = Table('programs', metadata, autoload_with=db_connection)
+studentsTable          = Table('students', metadata, autoload_with=db_connection)
 
 # =======================
 # ACCEPTED ENTRY FORMATS
@@ -35,50 +40,52 @@ def validate_inputs(input_dict):
     if input_errors:
          raise ValueError("\n".join(input_errors))
     
-def validate_programremove(removekey):
-    if GlobalHash.showEnrolled(removekey):
-        raise PermissionError("There are still Students currently enrolled!\nPlease Edit or Unenroll them First.")   
-
-def validate_collegeremove(removekey):
-    if GlobalHash.showConstituents(removekey):
-        raise PermissionError("There are still Students currently enrolled!\nPlease Edit or Unenroll them First.")   
-    
-def validate_studentduplicates(duplicatekey, edit=False, currentstudent=None):
-    Students = GlobalDFs.readStudentsDF()
-    
-    if edit and currentstudent:  
-        students_tovalidatedupe = Students[Students['ID Number'] != currentstudent]
-    else:
-        students_tovalidatedupe = Students
-
-    if (students_tovalidatedupe['ID'] == duplicatekey).sum() > 0:
-        raise FileExistsError(f"Student with ID {duplicatekey} already exists!")
-
-
-def validate_programduplicates(duplicatekey, edit=False, currentprogram=None):
-    Programs = GlobalDFs.readProgramsDF()
-
-    if edit and currentprogram:
-        programs_tovalidatedupe = Programs[Programs['Program Code'] != currentprogram]
-    else:
-        programs_tovalidatedupe = Programs
-
-    if (programs_tovalidatedupe['Program Code'] == duplicatekey).sum() > 0:
-        raise FileExistsError(f"Program with code {duplicatekey} already exists!")
-    
-def validate_collegeduplicates(duplicatekey, edit=False, currentcollege=None):
-    Colleges = GlobalDFs.readCollegesDF()
-
-    if edit and currentcollege:
-        colleges_tovalidatedupe = Colleges[Colleges['College Code'] != currentcollege]
-    else:
-        colleges_tovalidatedupe = Colleges
-        
-    if ((colleges_tovalidatedupe['College Code'] == duplicatekey).sum() > 0):
-        raise FileExistsError(f"College with code {duplicatekey} already exists!")
-
 # =======================
 #      CHECK INPUTS
+# =======================
+
+
+
+# =======================
+#      CHECK REMOVE
+# =======================
+    
+def constraint_enrolled_program(programCode):
+    checkStudents = select(studentsTable).where(studentsTable.c["Program Code"] == programCode)
+    if db_connection.execute(checkStudents).fetchone():
+        raise PermissionError(f"There are still Students currently enrolled in {programCode}!\nPlease Edit or Unenroll them First.")
+
+def constraint_enrolled_college(collegeCode):
+    checkStudents = select(studentsTable).where(studentsTable.c["College Code"] == collegeCode)
+    if db_connection.execute(checkStudents).fetchone():
+        raise PermissionError(f"There are still Students currently enrolled in {collegeCode}!\nPlease Edit or Unenroll them First.") 
+    
+# =======================
+#      CHECK REMOVE
+# =======================
+
+
+# =======================
+#      CHECK DUPES
+# =======================
+
+def validate_studentduplicates(studentID):
+    check = select(studentsTable).where(studentsTable.c["ID Number"] == studentID)
+    if db_connection.execute(check).fetchone():
+        raise ValueError(f"Student with ID Number {studentID} already exists!")
+
+def validate_programduplicates(programCode):
+    check = select(programsTable).where(programsTable.c["Program Code"] == programCode)
+    if db_connection.execute(check).fetchone():
+        raise ValueError(f"Program with Code {programCode} already exists!")
+    
+def validate_collegeduplicates(collegeCode):
+    check = select(collegesTable).where(collegesTable.c["College Code"] == collegeCode)
+    if db_connection.execute(check).fetchone():
+        raise ValueError(f"Program with Code {collegeCode} already exists!")
+
+# =======================
+#      CHECK DUPES
 # =======================
 
 
@@ -88,9 +95,6 @@ def validate_collegeduplicates(duplicatekey, edit=False, currentcollege=None):
 # =======================
 def show_removeerror_message(error):
     messagebox.showerror("Remove Error", str(error))
-
-def show_duplicateerror_message(error):
-    messagebox.showerror("Entity already exists!", str(error))
 
 def show_inputerror_message(error):
     messagebox.showerror("Input Error", str(error))

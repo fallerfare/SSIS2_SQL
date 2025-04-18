@@ -1,29 +1,31 @@
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Table, MetaData, select, update
+
+db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
+db_connection          = create_engine(db_connection_str).connect()
+metadata               = MetaData()
+collegesTable          = Table('colleges', metadata, autoload_with=db_connection)
+programsTable          = Table('programs', metadata, autoload_with=db_connection)
+studentsTable          = Table('students', metadata, autoload_with=db_connection)
+
 
 #==================
 # READING FUNCTIONS
 #==================
 def readStudentsDF():
-    db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
-    db_connection = create_engine(db_connection_str)
-
+   
     df = pd.read_sql('SELECT * FROM students', con=db_connection)
 
     return df
 
 def readProgramsDF():
-    db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
-    db_connection = create_engine(db_connection_str)
-
+   
     df = pd.read_sql('SELECT * FROM programs', con=db_connection)
 
     return df
 
 def readCollegesDF():
-    db_connection_str = 'mysql+pymysql://root:root@localhost/studentdbms'
-    db_connection = create_engine(db_connection_str)
-
+    
     df = pd.read_sql('SELECT * FROM colleges', con=db_connection)
 
     return df
@@ -35,6 +37,37 @@ def readCollegesDF():
 
 #==================
 # UPDATE FUNCTIONS
+#==================
+
+def updateStudents(old_programCode, new_programCode):
+
+    enrolledStudents = update(studentsTable).where(
+                    studentsTable.c["Program Code"] == old_programCode).values(
+                    studentsTable.c["Program Code"] == new_programCode)
+    db_connection.execute(enrolledStudents).all()
+
+def updatePrograms(old_collegeCode, new_collegeCode):
+
+    deptPrograms = update(programsTable).where(
+                    programsTable.c["College Code"] == old_collegeCode).values(
+                    programsTable.c["College Code"] == new_collegeCode)
+    db_connection.execute(deptPrograms).all()
+
+def updateConstituents(old_collegeCode, new_collegeCode):
+
+    constStudents = update(studentsTable).where(
+                    studentsTable.c["College Code"] == old_collegeCode).values(
+                    studentsTable.c["College Code"] == new_collegeCode)
+    db_connection.execute(constStudents).all()
+
+#==================
+# UPDATE FUNCTIONS
+#==================
+
+
+
+#==================
+# UPDATE DATAFRAME
 #==================
 def updateDF(dataframe):
     
@@ -50,41 +83,5 @@ def updateDF(dataframe):
     
     return newdataframe
 #==================
-# UPDATE FUNCTIONS
+# UPDATE DATAFRAME
 #==================
-
-
-
-# #==================
-# # APPENDING FUNCTIONS
-# #==================
-# def appendStudentsDF(newStudentdf):
-#     studentsDF = readStudentsDF()
-
-#     # Append only if the ID does not already exist
-#     studentsDF = pd.concat([studentsDF, newStudentdf]).drop_duplicates(subset=["ID"], keep="last")
-
-#     # Save back to CSV
-#     writeStudentsDF(studentsDF)
-
-      
-# def appendProgramsDF(newProgramdf):
-#     programsDF = readProgramsDF()
-
-#     # Append only if the ID does not already exist
-#     programsDF = pd.concat([programsDF, newProgramdf]).drop_duplicates(subset=["Program Code"], keep="last")
-
-#     # Save back to CSV
-#     writeProgramsDF(programsDF)
-
-# def appendCollegesDF(newCollegedf):
-#     collegesDF = readCollegesDF()
-
-#     # Append only if the ID does not already exist
-#     collegesDF = pd.concat([collegesDF, newCollegedf]).drop_duplicates(subset=["College Code"], keep="last")
-
-#     # Save back to CSV
-#     writeProgramsDF(collegesDF)
-# #==================
-# # APPENDING FUNCTIONS
-# #==================
