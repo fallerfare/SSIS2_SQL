@@ -4,16 +4,6 @@ import TKinterModernThemes as TKMT
 from DISPLAY.Repo import Repo
 from DATA import GlobalDFs
 
-import pymysql
-
-mydb = pymysql.connect(
-    host="localhost",
-    user="root",
-    passwd="root",
-    database="studentdbms",
-    connect_timeout=5
-)
-
 # =======================
 #     MAIN FUNCTION
 # =======================
@@ -40,9 +30,9 @@ if __name__ =="__main__":
       notebook = ttk.Notebook(window.root)
       notebook.pack(padx = 35, pady = 35, anchor= "center")
 
-      Students = Repo(notebook, notebook, GlobalDFs.readStudentsDF()) # Students Tab
-      Programs = Repo(notebook, notebook, GlobalDFs.readProgramsDF()) # Programs Tab
-      Colleges = Repo(notebook, notebook, GlobalDFs.readCollegesDF()) # Colleges Tab
+      Students = Repo(notebook, notebook, GlobalDFs.readStudentsDF(), "students") # Students Tab
+      Programs = Repo(notebook, notebook, GlobalDFs.readProgramsDF(), "programs") # Programs Tab
+      Colleges = Repo(notebook, notebook, GlobalDFs.readCollegesDF(), "colleges") # Colleges Tab
 
       notebook.add(Students.returnFrame(), text="Students")
       notebook.add(Programs.returnFrame(), text="Programs")

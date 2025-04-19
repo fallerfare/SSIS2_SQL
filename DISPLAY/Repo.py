@@ -5,10 +5,11 @@ from DISPLAY.BUTTONS.Buttons import Buttons
 from DATA import GlobalDFs
 
 class Repo:
-    def __init__(self, root, notebook, dataframe):
+    def __init__(self, root, notebook, dataframe, tab):
         self.root = root
         self.notebook = notebook
         self.dataframe = GlobalDFs.updateDF(dataframe)
+        self.tab = tab
         # Table Display
         self.RepoTable = ttk.Frame(self.root, width=990, height=600)  
         self.RepoTable.grid_rowconfigure(0, weight=1) 
@@ -35,7 +36,7 @@ class Repo:
 
         # Create items
         self.table = Table(self.tablepane, self.dataframe)
-        self.search = Filter(self.searchpane, self.dataframe, self.table)
+        self.search = Filter(self.searchpane, self.dataframe, self.table, self.tab)
         self.button = Buttons(self.buttonframe, self.dataframe, self.table)
 
         self.table.dataframe = GlobalDFs.updateDF(self.table.dataframe)

@@ -3,6 +3,10 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
 
+
+#==================
+#  SETUP DATAFRAME
+#==================
 Base = declarative_base()
 
 class Students(Base):
@@ -82,7 +86,14 @@ engine                  = create_engine(db_connection_str, echo = True)
 
 Base.metadata.create_all(bind = engine)
 session = Session()
+#==================
+#  SETUP DATAFRAME
+#==================
 
+
+#==================
+# READING FUNCTIONS
+#==================
 def studentsDF():
     return pd.read_sql_table("students", con = engine)
 
@@ -91,3 +102,6 @@ def programssDF():
 
 def collegessDF():
     return pd.read_sql_table("colleges", con = engine)
+#==================
+# READING FUNCTIONS
+#==================
