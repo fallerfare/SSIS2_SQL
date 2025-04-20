@@ -50,50 +50,46 @@ class Filter():
         self.sortwithkey = self.sortwithbar.get().strip()
         self.sortbykey = self.sortbybar.get().strip()
 
-        self.dataframe = df = GlobalDFs.filterDF(self.search_term, self.search_type, self.sortwithkey, self.sortbykey, self.tab)
+        # self.dataframe = df = GlobalDFs.filterDF(self.search_term, self.search_type, self.sortwithkey, self.sortbykey, self.tab)
+
+        # self.table.PopulateTable(self.table.tree, df)
+
+        connection = GlobalDFs.engine.connect()
+
+        self.basequery = f"SELECT * FROM  {self.tab} "
+        self.searchquery = ""
+        self.sortquery = ""
+        self.params = []
+
+        if self.dataframe.empty:
+            return
+
+        # Filtering logic
+        if self.search_term:
+            if self.search_type:
+                self.searchquery = f"WHERE `{self.search_type}` LIKE %s"
+                self.params.append(f"%{self.search_term}%", )
+            else: 
+                self.searchquery = f"WHERE ("
+
+                searchAll = []
+                self.params = []
+
+                for column in self.columns:
+                    searchAll.append(f"`{column}` LIKE %s")
+                    self.params.append(f"%{self.search_term}%", )
+
+                self.searchquery += " OR ".join(searchAll) + ")"
+                
+        # Sorting logic
+        if self.sortwithkey:
+            order = "ASC"
+            if self.sortbykey == "Descending": order = "DESC"
+
+            self.sortquery = f"ORDER BY `{self.sortwithkey}` {order}"
+
+        self.query = self.basequery + self.searchquery + self.sortquery
+        # print(self.query)
+        df = pd.read_sql(self.query, con=connection, params = tuple(self.params))
 
         self.table.PopulateTable(self.table.tree, df)
-
-
-        # # self.basequery = "SELECT * FROM students "
-        # # self.searchquery = ""
-        # # self.sortquery = ""
-        # # self.params = ()
-
-        # if self.dataframe.empty:
-        #     return
-
-        # # # Filtering logic
-        # # if self.search_term:
-        # #     if self.search_type:
-        # #         self.searchquery = f"WHERE `{self.search_type}` LIKE %s"
-        # #         self.params = (f"%{self.search_term}%", )
-        # #     else: 
-        # #         self.searchquery = f"WHERE ("
-        # #         for column in self.columns:
-        # #             self.searchquery += f"`{column}` LIKE %s"
-        # #             self.params = (f"%{self.search_term}%", )
-        # #         self.searchquery += f")"
-                
-        # # self.query = self.basequery + self.searchquery + self.sortquery
-        # # print(self.query)
-        # # df = pd.read_sql(self.query, con=db_connection, params = tuple(self.params))
-
-        # # Filtering logic
-
-        # self.filtered_df = GlobalDFs.readStudentsDF()
-
-        # if self.search_term:
-        #     if self.search_type:
-        #         self.filtered_df = self.filtered_df[self.filtered_df[self.search_type].astype(str)
-        #             .str.lower().str.contains(self.search_term, na=False)]
-        #     else:
-        #         mask = self.filtered_df.astype(str).apply(lambda row: row.str.lower().str.contains(self.search_term), axis=1)
-        #         self.filtered_df = self.filtered_df[mask.any(axis=1)]
-
-        # # Sorting logic
-        # if self.sortwithkey and self.sortbykey:
-        #     ascending = self.sortbykey == "Ascending"
-        #     self.filtered_df = self.filtered_df.sort_values(by=[self.sortwithkey], ascending=ascending)
-
-        # self.table.PopulateTable(self.table.tree, self.filtered_df)

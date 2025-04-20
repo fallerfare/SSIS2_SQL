@@ -1,6 +1,6 @@
 from tkinter import ttk
 import tkinter as tk
-from DATA import GlobalDFs, GlobalHash
+from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
 from sqlalchemy import create_engine, insert, update, Table, MetaData
 
@@ -75,10 +75,7 @@ class CreateCollgWindow:
 
     def CreateCollg(self):
 
-        self.db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
-        self.db_connection          = create_engine(self.db_connection_str).connect()
-        self.metadata               = MetaData()
-        self.collegesTable          = Table('colleges', self.metadata, autoload_with=self.db_connection)
+        connection = GlobalDFs.engine.connect()
 
         try:
 
@@ -95,14 +92,14 @@ class CreateCollgWindow:
 
                 Exceptions.validate_collegeduplicates(college_code)
 
-                newCollege = insert(self.collegesTable).values(
+                newCollege = insert(GlobalDFs.collegesTable).values(
                     **{
                         "College Code"  : f"{college_code}",
                         "College Name"  : f"{college_name}"
                     }
                 )
 
-                self.db_connection.execute(newCollege)    
+                connection.execute(newCollege)    
                     
             elif self.WinType == "Edit":
                 
@@ -110,28 +107,27 @@ class CreateCollgWindow:
                 item_values = self.table.tree.item(selected_item, "values")
                 old_college_code = item_values[0]
 
-                Exceptions.validate_collegeduplicates(college_code, edit = True, currentcollege = old_college_code)
+                Exceptions.validate_collegeduplicates(college_code, edit = True, current_ccode = old_college_code)
 
-                editCollege = update(self.collegesTable).where(self.collegesTable.c["College Code"] == old_college_code).values(
+                editCollege = update(GlobalDFs.collegesTable).where(GlobalDFs.collegesTable.c["College Code"] == old_college_code).values(
                     **{
                         "College Code"  : f"{college_code}",
                         "College Name"  : f"{college_name}"
                     }
                 )
             
-                self.db_connection.execute(editCollege)
+                connection.execute(editCollege)
 
-                GlobalHash.updatePrograms(old_college_code, college_code)
-                GlobalHash.updateConstituents(old_college_code, college_code)
+                GlobalDFs.updatePrograms(old_college_code, college_code)
+                GlobalDFs.updateConstituents(old_college_code, college_code)
 
-            self.db_connection.commit()
+            connection.commit()
+            connection.close()
             self.table.PopulateTable(self.table.tree, GlobalDFs.readCollegesDF())
             self.root.destroy()
 
         except ValueError as ve:
             Exceptions.show_inputerror_message(ve)
-        except FileExistsError as fe:
-            Exceptions.show_duplicateerror_message(fe)
         except Exception as e:
             Exceptions.show_unexpected_error(e)
         

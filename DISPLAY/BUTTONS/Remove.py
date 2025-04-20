@@ -1,6 +1,5 @@
 from tkinter import ttk, messagebox
 from DATA import GlobalDFs
-from DATA import GlobalHash
 from EXCEPTIONS import Exceptions
 from sqlalchemy import create_engine, delete, Table, MetaData
 
@@ -49,39 +48,37 @@ class Remove:
         
         # Debugging
         # print("Removing: " + self.removekey)
-
-        self.dataframe = GlobalDFs.updateDF(self.dataframe) 
-        self.db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
-        self.db_connection          = create_engine(self.db_connection_str).connect()
-        self.metadata               = MetaData()
-        self.studentsTable          = Table('students', self.metadata, autoload_with=self.db_connection)
-        self.programsTable          = Table('programs', self.metadata, autoload_with=self.db_connection)
-        self.collegesTable          = Table('colleges', self.metadata, autoload_with=self.db_connection)
-
-        # Match key to current tab
         match self.column_name:
             case "ID Number":
-                # Remove the row
-                self.removeAct      = delete(self.studentsTable).where(self.studentsTable.c["ID Number"] == self.removekey)
-                
+                query = delete(GlobalDFs.studentsTable).where(
+                    GlobalDFs.studentsTable.c["ID Number"] == self.removekey)
+
             case "Program Code":
                 try:
                     Exceptions.constraint_enrolled_program(self.removekey)
-                    # Remove the row
-                    self.removeAct  = delete(self.programsTable).where(self.programsTable.c["Program Code"] == self.removekey)
+                    query = delete(GlobalDFs.programsTable).where(
+                        GlobalDFs.programsTable.c["Program Code"] == self.removekey)
                 except PermissionError as pe:
                     Exceptions.show_removeerror_message(pe)
+                    return
 
             case "College Code":
                 try:
                     Exceptions.constraint_enrolled_college(self.removekey)
-                    # Remove the row
-                    self.removeAct  = delete(self.collegesTable).where(self.programsTable.c["College Code"] == self.removekey)
+                    query = delete(GlobalDFs.collegesTable).where(
+                        GlobalDFs.collegesTable.c["College Code"] == self.removekey)
                 except PermissionError as pe:
                     Exceptions.show_removeerror_message(pe)
-                
-        self.db_connection.execute(self.removeAct)
-        self.db_connection.commit()
+                    return
+
+            case _:
+                return
+
+        connection = GlobalDFs.engine.connect()
+        connection.execute(query)
+        connection.commit()
+        connection.close()
+
         self.table.PopulateTable(self.table.tree, GlobalDFs.updateDF(self.dataframe))
         self.removekey = None
 

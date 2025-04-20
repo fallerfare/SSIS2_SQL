@@ -169,10 +169,7 @@ class SignUpWindow:
 
     def SignUp(self):
         
-        self.db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
-        self.db_connection          = create_engine(self.db_connection_str).connect()
-        self.metadata               = MetaData()
-        self.studentsTable          = Table('students', self.metadata, autoload_with=self.db_connection)
+        connection = GlobalDFs.engine.connect()
 
         try:
 
@@ -200,14 +197,11 @@ class SignUpWindow:
             })
             # Check entries' formats
 
-            Exceptions.validate_studentduplicates(ID_number)
-
-
             # If window was called by ADD Button
             if(self.WinType == "Add"):
-                # Exceptions.validate_studentduplicates(ID_number)
+                Exceptions.validate_studentduplicates(ID_number)
 
-                newStudent = insert(self.studentsTable).values(
+                newStudent = insert(GlobalDFs.studentsTable).values(
                     **{
                         "ID Number"     : f"{ID_number}",
                         "First Name"    : f"{first_name}",
@@ -220,7 +214,7 @@ class SignUpWindow:
                     }
                 )
 
-                self.db_connection.execute(newStudent)             
+                connection.execute(newStudent)             
             # If window was called by ADD Button
 
             # If window was called by EDIT Button
@@ -229,9 +223,9 @@ class SignUpWindow:
                 item_values = self.table.tree.item(selected_item, "values")
                 old_ID_number = item_values[0]
 
-                # Exceptions.validate_studentduplicates(ID_number, edit = True, currentstudent = old_ID_number)
+                Exceptions.validate_studentduplicates(ID_number, edit = True, current_id = old_ID_number)
 
-                editStudent = update(self.studentsTable).where(self.studentsTable.c["ID Number"] == old_ID_number).values(
+                editStudent = update(GlobalDFs.studentsTable).where(GlobalDFs.studentsTable.c["ID Number"] == old_ID_number).values(
                     **{
                         "ID Number"     : f"{ID_number}",
                         "First Name"    : f"{first_name}",
@@ -244,9 +238,10 @@ class SignUpWindow:
                     }
                 )
             
-                self.db_connection.execute(editStudent)
+                connection.execute(editStudent)
 
-            self.db_connection.commit()
+            connection.commit()
+            connection.close()
             self.table.PopulateTable(self.table.tree, GlobalDFs.readStudentsDF())
             self.root.destroy()
 

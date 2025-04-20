@@ -1,6 +1,6 @@
 from tkinter import ttk
 import tkinter as tk
-from DATA import GlobalDFs, GlobalHash
+from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
 from sqlalchemy import create_engine, insert, update, Table, MetaData
 
@@ -89,10 +89,7 @@ class CreateProgWindow:
 
     def CreateProg(self):
 
-        self.db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
-        self.db_connection          = create_engine(self.db_connection_str).connect()
-        self.metadata               = MetaData()
-        self.programsTable          = Table('programs', self.metadata, autoload_with=self.db_connection)
+        connection = GlobalDFs.engine.connect()
        
         try:
             program_name = self.ProgramNameEntryBox.get().strip()
@@ -108,7 +105,7 @@ class CreateProgWindow:
             if self.WinType == "Add":
                 Exceptions.validate_programduplicates(program_code)
                 
-                newProgram = insert(self.programsTable).values(
+                newProgram = insert(GlobalDFs.programsTable).values(
                     **{
                         "Program Code"  : f"{program_name}",
                         "Program Name"  : f"{program_code}",
@@ -116,15 +113,15 @@ class CreateProgWindow:
                     }
                 )
 
-                self.db_connection.execute(newProgram) 
+                connection.execute(newProgram) 
                 
             elif self.WinType == "Edit":
                 selected_item = self.table.tree.selection()
                 item_values = self.table.tree.item(selected_item, "values")
                 old_program_code = item_values[0]
-                Exceptions.validate_programduplicates(program_code, edit = True, currentprogram = old_program_code)
+                Exceptions.validate_programduplicates(program_code, edit = True, current_pcode = old_program_code)
 
-                editProgram = update(self.programsTable).where(self.programsTable.c["Porgram Code"] == old_program_code).values(
+                editProgram = update(GlobalDFs.programsTable).where(GlobalDFs.programsTable.c["Program Code"] == old_program_code).values(
                     **{
                         "Program Code"  : f"{program_code}",
                         "Program Name"  : f"{program_name}",
@@ -132,18 +129,18 @@ class CreateProgWindow:
                     }
                 )
             
-                self.db_connection.execute(editProgram)
+                connection.execute(editProgram)
 
-                GlobalHash.updateStudents(old_program_code, program_code)                
+                GlobalDFs.updateStudents(old_program_code, program_code)                
                  
-            
+            connection.commit()
+            connection.close()
+            self.table.PopulateTable(self.table.tree, GlobalDFs.readProgramsDF())
             self.root.destroy()
             
         
         except ValueError as ve:
             Exceptions.show_inputerror_message(ve)
-        except FileExistsError as fe:
-            Exceptions.show_duplicateerror_message(fe)
         except Exception as e:
             Exceptions.show_unexpected_error(e)
 # ===================

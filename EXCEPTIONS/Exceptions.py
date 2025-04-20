@@ -1,13 +1,9 @@
 from tkinter import messagebox
 import re
 from sqlalchemy import create_engine, Table, MetaData, select
+from DATA import GlobalDFs
 
-db_connection_str      = 'mysql+pymysql://root:root@localhost/studentdbms'
-db_connection          = create_engine(db_connection_str).connect()
-metadata               = MetaData()
-collegesTable          = Table('colleges', metadata, autoload_with=db_connection)
-programsTable          = Table('programs', metadata, autoload_with=db_connection)
-studentsTable          = Table('students', metadata, autoload_with=db_connection)
+connection = GlobalDFs.engine.connect()
 
 # =======================
 # ACCEPTED ENTRY FORMATS
@@ -51,13 +47,13 @@ def validate_inputs(input_dict):
 # =======================
     
 def constraint_enrolled_program(programCode):
-    checkStudents = select(studentsTable).where(studentsTable.c["Program Code"] == programCode)
-    if db_connection.execute(checkStudents).fetchone():
+    checkStudents = select(GlobalDFs.studentsTable).where(GlobalDFs.studentsTable.c["Program Code"] == programCode)
+    if connection.execute(checkStudents).fetchone():
         raise PermissionError(f"There are still Students currently enrolled in {programCode}!\nPlease Edit or Unenroll them First.")
 
 def constraint_enrolled_college(collegeCode):
-    checkStudents = select(studentsTable).where(studentsTable.c["College Code"] == collegeCode)
-    if db_connection.execute(checkStudents).fetchone():
+    checkStudents = select(GlobalDFs.studentsTable).where(GlobalDFs.studentsTable.c["College Code"] == collegeCode)
+    if connection.execute(checkStudents).fetchone():
         raise PermissionError(f"There are still Students currently enrolled in {collegeCode}!\nPlease Edit or Unenroll them First.") 
     
 # =======================
@@ -69,19 +65,28 @@ def constraint_enrolled_college(collegeCode):
 #      CHECK DUPES
 # =======================
 
-def validate_studentduplicates(studentID):
-    check = select(studentsTable).where(studentsTable.c["ID Number"] == studentID)
-    if db_connection.execute(check).fetchone():
-        raise ValueError(f"Student with ID Number {studentID} already exists!")
+def validate_studentduplicates(studentID, edit = False, current_id = None):
+    check = select(GlobalDFs.studentsTable).where(GlobalDFs.studentsTable.c["ID Number"] == studentID)
+    duplicate = connection.execute(check).fetchone()
+    if edit and duplicate and duplicate[0] == current_id:
+        return
+    if duplicate:
+        raise ValueError(f"Student with ID Number {studentID} already exists!")   
 
-def validate_programduplicates(programCode):
-    check = select(programsTable).where(programsTable.c["Program Code"] == programCode)
-    if db_connection.execute(check).fetchone():
+def validate_programduplicates(programCode, edit = False, current_pcode = None):
+    check = select(GlobalDFs.programsTable).where(GlobalDFs.programsTable.c["Program Code"] == programCode)
+    duplicate = connection.execute(check).fetchone()
+    if edit and duplicate and duplicate[0] == current_pcode:
+        return
+    if duplicate:
         raise ValueError(f"Program with Code {programCode} already exists!")
     
-def validate_collegeduplicates(collegeCode):
-    check = select(collegesTable).where(collegesTable.c["College Code"] == collegeCode)
-    if db_connection.execute(check).fetchone():
+def validate_collegeduplicates(collegeCode, edit = False, current_ccode = None):
+    check = select(GlobalDFs.collegesTable).where(GlobalDFs.collegesTable.c["College Code"] == collegeCode)
+    duplicate = connection.execute(check).fetchone()
+    if edit and duplicate and duplicate[0] == current_ccode:
+        return
+    if duplicate:
         raise ValueError(f"Program with Code {collegeCode} already exists!")
 
 # =======================
