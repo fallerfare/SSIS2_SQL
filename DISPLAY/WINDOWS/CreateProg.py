@@ -107,8 +107,8 @@ class CreateProgWindow:
                 
                 newProgram = insert(GlobalDFs.programsTable).values(
                     **{
-                        "Program Code"  : f"{program_name}",
-                        "Program Name"  : f"{program_code}",
+                        "Program Name"  : f"{program_name}",
+                        "Program Code"  : f"{program_code}",
                         "College Code"  : f"{college_code}"
                     }
                 )
@@ -129,9 +129,7 @@ class CreateProgWindow:
                     }
                 )
             
-                connection.execute(editProgram)
-
-                GlobalDFs.updateStudents(old_program_code, program_code)                
+                connection.execute(editProgram)              
                  
             connection.commit()
             connection.close()

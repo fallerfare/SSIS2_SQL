@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, update, Column, ForeignKey, ForeignKeyConstraint, VARCHAR, or_, desc, MetaData
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import create_engine, update, Column, ForeignKeyConstraint, VARCHAR, MetaData
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
 
@@ -24,11 +24,13 @@ class Students(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ["Program Code"], ["programs.Program Code"],
-            ondelete="RESTRICT"
+            ondelete="RESTRICT",
+            onupdate="CASCADE"
         ),
         ForeignKeyConstraint(
             ["College Code"], ["colleges.College Code"],
-            ondelete="RESTRICT"
+            ondelete="RESTRICT",
+            onupdate="CASCADE"
         ),
     )
 
@@ -55,7 +57,8 @@ class Programs(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ["College Code"], ["colleges.College Code"],
-            ondelete="RESTRICT"
+            ondelete="RESTRICT",
+            onupdate="CASCADE"
         ),
     )
 
@@ -81,7 +84,7 @@ class Colleges(Base):
         return f"({self.cC}, {self.cn})"
 
 
-db_connection_str       = 'mysql+pymysql://root:root@localhost/studentdbms'
+db_connection_str       = 'mysql+pymysql://root:root@localhost/teststudentdbms'
 engine                  = create_engine(db_connection_str, echo = True)
 connection              = engine.connect()
 
@@ -104,6 +107,7 @@ session = SessionLocal()
 #==================
 # READING FUNCTIONS
 #==================
+
 def readStudentsDF():
     return pd.read_sql_table("students", con = engine)
 
@@ -112,6 +116,7 @@ def readProgramsDF():
 
 def readCollegesDF():
     return pd.read_sql_table("colleges", con = engine)
+
 #==================
 # READING FUNCTIONS
 #==================
@@ -121,30 +126,6 @@ def readCollegesDF():
 #==================
 # UPDATE FUNCTIONS
 #==================
-
-def updateStudents(old_programCode, new_programCode):
-
-    enrolledStudents = update(Students).where(
-                    Students.pC == old_programCode).values(
-                    {Students.pC : new_programCode})
-    session.execute(enrolledStudents)
-    session.commit()
-
-def updatePrograms(old_collegeCode, new_collegeCode):
-
-    deptPrograms = update(Programs).where(
-                    Programs.cC == old_collegeCode).values(
-                    {Programs.cC : new_collegeCode})
-    session.execute(deptPrograms)
-    session.commit()
-
-def updateConstituents(old_collegeCode, new_collegeCode):
-
-    constStudents = update(Students).where(
-                    Students.cC == old_collegeCode).values(
-                    {Students.cC : new_collegeCode})
-    session.execute(constStudents)
-    session.commit()
 
 def updateDF(dataframe):
     first_col = dataframe.columns[0]

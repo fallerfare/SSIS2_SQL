@@ -9,8 +9,8 @@ connection = GlobalDFs.engine.connect()
 # ACCEPTED ENTRY FORMATS
 # =======================
 NormalEntry = re.compile(r"^[A-Z][a-z]+(?:\s[A-Z][a-z]+)*$")
-ProgramEntry = re.compile(r"^Bachelor (of|Of) [A-Za-z\s]+$")
-CollegeEntry = re.compile(r"^College (of|Of) [A-Za-z\s]+$")
+ProgramEntry = re.compile(r"^Bachelor (of|Of) [A-Za-z\s\&\(\)]+$")
+CollegeEntry = re.compile(r"^College (of|Of) [A-Za-z\s\&\(\)]+$")
 IDEntry = re.compile(r"^\d{4}-\d{4}$")
 EmailEntry = re.compile(r"^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,3}$")
 CodeEntry = re.compile(r"^[A-Za-z]{3,6}$")
@@ -19,7 +19,7 @@ YearEntry = re.compile(r"^[1-5](st|nd|rd|th) (Year|Year and Above)$")
 # ACCEPTED ENTRY FORMATS
 # =======================
 
-
+# Bachelor Of Science In Business Administration (Business Economics)
 
 # =======================
 #      CHECK INPUTS

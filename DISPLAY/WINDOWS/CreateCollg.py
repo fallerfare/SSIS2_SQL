@@ -118,9 +118,6 @@ class CreateCollgWindow:
             
                 connection.execute(editCollege)
 
-                GlobalDFs.updatePrograms(old_college_code, college_code)
-                GlobalDFs.updateConstituents(old_college_code, college_code)
-
             connection.commit()
             connection.close()
             self.table.PopulateTable(self.table.tree, GlobalDFs.readCollegesDF())

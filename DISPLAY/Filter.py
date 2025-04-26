@@ -11,22 +11,25 @@ class Filter():
         self.columns = self.dataframe.columns
         self.tab = tab
 
-        self.searchlabel = ttk.Label(self.root, text="Search", font=('Arial', 12))
-        self.searchbylabel = ttk.Label(self.root, text="by: ", font=('Arial', 12))
-        self.sortwithlabel = ttk.Label(self.root, text="Sort with", font=('Arial', 12))
-        self.sortbylabel = ttk.Label(self.root, text="Sort by", font=('Arial', 12))
+        self.frame = ttk.Frame(self.root)
+        self.frame.pack(anchor = "center")
 
-        self.searchbar = ttk.Entry(self.root, font=('Arial', 9), width=20)
-        self.searchbychoose = ttk.Combobox(self.root, state="readonly",
-                                         values=list(self.dataframe.columns),
+        self.searchlabel = ttk.Label(self.frame, text="Search", font=('Arial', 12))
+        self.searchbylabel = ttk.Label(self.frame, text="by: ", font=('Arial', 12))
+        self.sortwithlabel = ttk.Label(self.frame, text="Sort with", font=('Arial', 12))
+        self.sortbylabel = ttk.Label(self.frame, text="Sort by", font=('Arial', 12))
+
+        self.searchbar = ttk.Entry(self.frame, font=('Arial', 9), width=20)
+        self.searchbychoose = ttk.Combobox(self.frame, state="readonly",
+                                         values=["--Default--"] + list(self.columns),
                                         width=15)
 
-        self.sortwithbar = ttk.Combobox(self.root, state="readonly",
-                                        values=list(self.dataframe.columns),
+        self.sortwithbar = ttk.Combobox(self.frame, state="readonly",
+                                        values=["--Default--"] + list(self.columns),
                                         width=15)
 
-        self.sortbybar = ttk.Combobox(self.root, state="readonly",
-                                      values=["Ascending", "Descending"],
+        self.sortbybar = ttk.Combobox(self.frame, state="readonly",
+                                      values=["--Default--", "Ascending", "Descending"],
                                       width=15)
 
         self.searchbar.bind("<KeyRelease>", self.perform_searchandsort)
@@ -50,10 +53,6 @@ class Filter():
         self.sortwithkey = self.sortwithbar.get().strip()
         self.sortbykey = self.sortbybar.get().strip()
 
-        # self.dataframe = df = GlobalDFs.filterDF(self.search_term, self.search_type, self.sortwithkey, self.sortbykey, self.tab)
-
-        # self.table.PopulateTable(self.table.tree, df)
-
         connection = GlobalDFs.engine.connect()
 
         self.basequery = f"SELECT * FROM  {self.tab} "
@@ -66,7 +65,7 @@ class Filter():
 
         # Filtering logic
         if self.search_term:
-            if self.search_type:
+            if self.search_type and not "--Default--":
                 self.searchquery = f"WHERE `{self.search_type}` LIKE %s"
                 self.params.append(f"%{self.search_term}%", )
             else: 
@@ -84,6 +83,7 @@ class Filter():
         # Sorting logic
         if self.sortwithkey:
             order = "ASC"
+            if self.sortwithkey == "--Default--": self.sortwithkey = f"{self.columns[0]}"
             if self.sortbykey == "Descending": order = "DESC"
 
             self.sortquery = f"ORDER BY `{self.sortwithkey}` {order}"

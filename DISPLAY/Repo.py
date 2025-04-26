@@ -1,4 +1,4 @@
-from DISPLAY.Table import Table
+from DISPLAY.TablePagination import Table
 from DISPLAY.Filter import Filter
 from tkinter import ttk
 from DISPLAY.BUTTONS.Buttons import Buttons
