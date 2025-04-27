@@ -53,6 +53,8 @@ class CreateProgWindow:
         # EntryBoxes
         self.ProgramNameEntryBox        = ttk.Entry(self.frame, font=('Arial', 9), width=35, textvariable=self.ProgramNameVar)
         self.ProgramCodeEntryBox        = ttk.Entry(self.frame, font=('Arial', 9), width=35, textvariable=self.ProgramCodeVar)
+        if self.WinType == "Edit":
+            self.ProgramCodeEntryBox.config(state = "disabled")
 
         # Dropdowns
         self.collegechoices             = list(GlobalDFs.readCollegesDF()['College Code'])

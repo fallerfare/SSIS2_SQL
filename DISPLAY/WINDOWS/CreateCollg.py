@@ -44,6 +44,8 @@ class CreateCollgWindow:
         # EntryBoxes
         self.CollegeNameEntryBox        = ttk.Entry(self.frame, font=('Arial', 9), width=35, textvariable=self.CollegeNameVar)
         self.CollegeCodeEntryBox        = ttk.Entry(self.frame, font=('Arial', 9), width=35, textvariable=self.CollegeCodeVar)
+        if self.WinType == "Edit":
+            self.CollegeCodeEntryBox.config(state = "disabled")
 
 
         # Buttons

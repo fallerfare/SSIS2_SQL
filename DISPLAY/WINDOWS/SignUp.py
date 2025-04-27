@@ -74,6 +74,8 @@ class SignUpWindow:
         self.LastNameEntryBox   = ttk.Entry(self.frame, width=35,                       font=('Arial', 9), textvariable=self.LastNameVar)
         self.EmailEntryBox      = ttk.Entry(self.frame, width=35,                       font=('Arial', 9), textvariable=self.EmailVar)
         self.IDEntryBox         = ttk.Entry(self.frame, width=35,                       font=('Arial', 9), textvariable=self.IDVar)
+        if self.WinType == "Edit":
+            self.IDEntryBox.config(state = "disabled")
 
         # Dropdowns
         self.collegechoices     = list(GlobalDFs.readCollegesDF()['College Code'])

@@ -1,4 +1,5 @@
 from tkinter import ttk
+import tkinter as tk
 from DATA import GlobalDFs
 import math
 
@@ -14,6 +15,7 @@ class Table():
                 self.items = len(self.dataframe)
                 self.pages = math.ceil(self.items/self.rows_page)
                 self.curr_page = 1
+                self.curr_page_var = tk.IntVar(value=(self.curr_page)) 
                 self.pageList = []
 
                 # Treeview
@@ -43,6 +45,8 @@ class Table():
                 self.items = len(self.dataframe)
                 self.pages = math.ceil(self.items/self.rows_page)
                 self.curr_page = page
+                self.curr_page_var = tk.IntVar(value=(self.curr_page)) 
+
                 # print("Populating")
                 
                 for row in self.tree.get_children():
@@ -62,11 +66,11 @@ class Table():
 
                 self.tree.pack(side="top", fill="both", anchor = "center", expand=True)       
 
-                self.prevTenButt = ttk.Button(self.pageButtons, text = "<<10", command = lambda: self.PrevTenPage())
+                self.prevTenButt = ttk.Button(self.pageButtons, text = "<<10", command = lambda: self.PrevTenPage(), width = 5)
                 self.prevTenButt.pack(side = "left", padx = 2)
                 self.pageList.append(self.prevTenButt)
 
-                self.prevButt = ttk.Button(self.pageButtons, text = "<", command = lambda: self.PrevPage())
+                self.prevButt = ttk.Button(self.pageButtons, text = "<", command = lambda: self.PrevPage(), width = 3)
                 self.prevButt.pack(side = "left", padx = 2)
                 self.pageList.append(self.prevButt)
 
@@ -76,14 +80,24 @@ class Table():
                                 numButt.pack(side = "left", padx = 2)
                                 self.pageList.append(numButt)
 
-                self.nextButt = ttk.Button(self.pageButtons, text = ">", command = lambda: self.NextPage())
+                self.nextButt = ttk.Button(self.pageButtons, text = ">", command = lambda: self.NextPage(), width = 3)
                 self.nextButt.pack(side = "left", padx = 2)
                 self.pageList.append(self.nextButt)
 
-                self.nextTenButt = ttk.Button(self.pageButtons, text = "10>>", command = lambda: self.NextTenPage())
+                self.nextTenButt = ttk.Button(self.pageButtons, text = "10>>", command = lambda: self.NextTenPage(), width = 5)
                 self.nextTenButt.pack(side = "left", padx = 2)
                 self.pageList.append(self.nextTenButt)
 
+                self.pageJump = ttk.Combobox(self.pageButtons, state = "readonly", values = list(range(1, self.pages + 1)), textvariable = self.curr_page_var, width = 5)
+                self.pageJump.pack(side = "right", padx = 3)
+
+                def jump(event):
+                        page = int(self.pageJump.get())
+                        if page > 0: self.GotoPage(page)
+
+                self.pageJump.bind("<<ComboboxSelected>>", jump)
+                self.pageJump.bind("<KeyRelease>", jump)
+                self.pageList.append(self.pageJump)
 
                 self.prevButt.config(state = "disabled") if self.curr_page <= 1 else self.prevButt.config(state = "normal")
                 self.nextButt.config(state = "disabled") if self.curr_page >= self.pages else self.nextButt.config(state = "normal")  
