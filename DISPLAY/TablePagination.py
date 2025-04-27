@@ -75,7 +75,7 @@ class Table():
                 self.pageList.append(self.prevButt)
 
                 for i in range(1, self.pages + 1):
-                        if self.pages+1 < 10 or i < 5 or (i == 5 and self.curr_page <=5) or i == self.curr_page or (i == (self.pages - 4) and self.curr_page >=(self.pages - 4)) or i > (self.pages - 4):
+                        if (i <= 11 and self.curr_page < 6) or i == self.curr_page or ((i >= self.curr_page - 5) and (i <= self.curr_page + 5)) or (i >= self.pages - 10 and self.curr_page > self.pages - 5):
                                 numButt = ttk.Button(self.pageButtons, text = str(i), command = (lambda i=i: self.GotoPage(i)), width = 3)
                                 numButt.pack(side = "left", padx = 2)
                                 self.pageList.append(numButt)
