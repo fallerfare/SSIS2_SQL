@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, update, Column, ForeignKeyConstraint, VARCHAR, MetaData
+from sqlalchemy import create_engine, Column, ForeignKeyConstraint, VARCHAR, MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd

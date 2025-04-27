@@ -1,7 +1,7 @@
 from tkinter import ttk, messagebox
 from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
-from sqlalchemy import create_engine, delete, Table, MetaData
+from sqlalchemy import delete
 
 # =====================
 #    REMOVE BUTTON

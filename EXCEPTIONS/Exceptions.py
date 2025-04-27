@@ -1,6 +1,6 @@
 from tkinter import messagebox
 import re
-from sqlalchemy import create_engine, Table, MetaData, select
+from sqlalchemy import select
 from DATA import GlobalDFs
 
 connection = GlobalDFs.engine.connect()

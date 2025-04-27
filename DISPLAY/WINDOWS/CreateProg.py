@@ -2,7 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 from DATA import GlobalDFs
 from EXCEPTIONS import Exceptions
-from sqlalchemy import create_engine, insert, update, Table, MetaData
+from sqlalchemy import insert, update
 
 # ===================
 #   PROGRAM WINDOW
