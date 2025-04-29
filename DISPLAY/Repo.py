@@ -2,13 +2,13 @@ from DISPLAY.TablePagination import Table
 from DISPLAY.Filter import Filter
 from tkinter import ttk
 from DISPLAY.BUTTONS.Buttons import Buttons
-from DATA import GlobalDFs
+from DATA import GlobalSQL
 
 class Repo:
     def __init__(self, root, notebook, dataframe, tab):
         self.root = root
         self.notebook = notebook
-        self.dataframe = GlobalDFs.updateDF(dataframe)
+        self.dataframe = GlobalSQL.updateDF(dataframe)
         self.tab = tab
         # Table Display
         self.RepoTable = ttk.Frame(self.root, width=990, height=600)  
@@ -32,14 +32,14 @@ class Repo:
         self.buttonframe = ttk.Frame(self.RepoTable)
         self.buttonframe.grid(row = 3, column=0, sticky="e", pady=15)
 
-        self.dataframe = GlobalDFs.updateDF(self.dataframe)
+        self.dataframe = GlobalSQL.updateDF(self.dataframe)
 
         # Create items
         self.table = Table(self.tablepane, self.dataframe)
         self.search = Filter(self.searchpane, self.dataframe, self.table, self.tab)
         self.button = Buttons(self.buttonframe, self.dataframe, self.table)
 
-        self.table.dataframe = GlobalDFs.updateDF(self.table.dataframe)
+        self.table.dataframe = GlobalSQL.updateDF(self.table.dataframe)
 
     def returnFrame(self):
         return self.RepoTable

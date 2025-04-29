@@ -1,6 +1,6 @@
 from tkinter import ttk
 from DISPLAY.WINDOWS import SignUp, CreateCollg, CreateProg
-from DATA import GlobalDFs
+from DATA import GlobalSQL
 
 # =====================
 #    EDIT BUTTON
@@ -9,7 +9,7 @@ class Edit:
     def __init__(self, root, dataframe, table):
         # ye
         self.root = root
-        self.dataframe = GlobalDFs.updateDF(dataframe)
+        self.dataframe = GlobalSQL.updateDF(dataframe)
         self.table = table
 
         # Format Add Button according to tab
