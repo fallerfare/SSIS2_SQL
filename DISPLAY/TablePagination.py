@@ -1,6 +1,6 @@
 from tkinter import ttk
 import tkinter as tk
-from DATA import GlobalDFs
+from DATA import GlobalSQL
 import math
 
 # ==========================================
@@ -9,7 +9,7 @@ import math
 class Table():
         def __init__(self, root, dataframe):
                 self.root = root
-                self.dataframe = GlobalDFs.updateDF(dataframe)
+                self.dataframe = GlobalSQL.updateDF(dataframe)
 
                 self.rows_page = 11
                 self.items = len(self.dataframe)

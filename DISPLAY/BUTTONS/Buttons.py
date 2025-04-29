@@ -1,6 +1,6 @@
-from DATA import GlobalDFs
+from DATA import GlobalSQL
 import DISPLAY.BUTTONS.Add as Add  
-import DISPLAY.BUTTONS.Remove as Remove
+import DISPLAY.BUTTONS.RemoveSQL as Remove
 import DISPLAY.BUTTONS.Edit as Edit
 import DISPLAY.BUTTONS.Refresh as Refresh
 
@@ -9,10 +9,11 @@ import DISPLAY.BUTTONS.Refresh as Refresh
 # =========================
 class Buttons:
 
-    def __init__(self, root, dataframe, table):
+    def __init__(self, root, dataframe, table, search):
         self.root = root
-        self.dataframe = GlobalDFs.updateDF(dataframe)
+        self.dataframe = GlobalSQL.updateDF(dataframe)
         self.table = table
+        self.search = search
         self.createbuttons()
         self.tree = self.table.tree
         self.tree.bind("<<TreeviewSelect>>", lambda event: self.on_select(event)) 
@@ -22,7 +23,7 @@ class Buttons:
         self.enroll_button  = Add.Add(      self.root, self.dataframe, self.table)  
         self.remove_button  = Remove.Remove(self.root, self.dataframe, self.table)  
         self.edit_button    = Edit.Edit(    self.root, self.dataframe, self.table)  
-        self.refresh_button = Refresh.Refresh(self.root, self.dataframe, self.table)  
+        self.refresh_button = Refresh.Refresh(self.root, self.dataframe, self.table, self.search)  
 
         self.remove_button.Button.config(   state="disabled")
         self.edit_button.Button.config(     state="disabled")

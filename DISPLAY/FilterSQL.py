@@ -52,8 +52,6 @@ class Filter():
         self.sortwithkey = self.sortwithbar.get().strip()
         self.sortbykey = self.sortbybar.get().strip()
 
-        connection = GlobalSQL.connection()
-
         self.basequery = f"SELECT * FROM  {self.tab} "
         self.searchquery = ""
         self.sortquery = ""
@@ -64,7 +62,7 @@ class Filter():
 
         # Filtering logic
         if self.search_term:
-            if self.search_type and not "--Default--":
+            if self.search_type and self.search_type != "--Default--":
                 self.searchquery = f"WHERE `{self.search_type}` LIKE %s"
                 self.params.append(f"%{self.search_term}%", )
             else: 
@@ -88,7 +86,7 @@ class Filter():
             self.sortquery = f"ORDER BY `{self.sortwithkey}` {order}"
 
         self.query = self.basequery + self.searchquery + self.sortquery
-        # print(self.query)
-        df = pd.read_sql(self.query, con=connection, params = tuple(self.params))
+        print(self.query)
+        df = GlobalSQL.returnDataframe(self.query, self.params)
 
         self.table.PopulateTable(self.table.tree, df)

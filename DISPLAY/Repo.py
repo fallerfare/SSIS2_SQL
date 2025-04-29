@@ -1,5 +1,5 @@
 from DISPLAY.TablePagination import Table
-from DISPLAY.Filter import Filter
+from DISPLAY.FilterSQL import Filter
 from tkinter import ttk
 from DISPLAY.BUTTONS.Buttons import Buttons
 from DATA import GlobalSQL
@@ -35,9 +35,10 @@ class Repo:
         self.dataframe = GlobalSQL.updateDF(self.dataframe)
 
         # Create items
+
         self.table = Table(self.tablepane, self.dataframe)
         self.search = Filter(self.searchpane, self.dataframe, self.table, self.tab)
-        self.button = Buttons(self.buttonframe, self.dataframe, self.table)
+        self.button = Buttons(self.buttonframe, self.dataframe, self.table, self.search)
 
         self.table.dataframe = GlobalSQL.updateDF(self.table.dataframe)
 

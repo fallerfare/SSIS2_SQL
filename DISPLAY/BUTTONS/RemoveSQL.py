@@ -47,14 +47,17 @@ class Remove:
         
         # Debugging
         # print("Removing: " + self.removekey)
+
+        params = (self.removekey)
+
         match self.column_name:
             case "ID Number":
-                query = f"DELETE FROM students WHERE `ID Number` = {self.removekey}"
+                query = f"DELETE FROM students WHERE `ID Number` = %s"
 
             case "Program Code":
                 try:
                     ExceptionsSQL.constraint_enrolled_program(self.removekey)
-                    query = f"DELETE FROM programs WHERE `Program Code` = {self.removekey}"
+                    query = f"DELETE FROM programs WHERE `Program Code` = %s"
                 except PermissionError as pe:
                     ExceptionsSQL.show_removeerror_message(pe)
                     return
@@ -62,7 +65,8 @@ class Remove:
             case "College Code":
                 try:
                     ExceptionsSQL.constraint_enrolled_college(self.removekey)
-                    query = f"DELETE FROM colleges WHERE `College Code` = {self.removekey}"
+                    ExceptionsSQL.constraint_made_programs(self.removekey)
+                    query = f"DELETE FROM colleges WHERE `College Code` = %s"
                 except PermissionError as pe:
                     ExceptionsSQL.show_removeerror_message(pe)
                     return
@@ -70,12 +74,14 @@ class Remove:
             case _:
                 return
 
-        connection = GlobalSQL.connection()
-        cursor = GlobalSQL.cursor()
-
-        cursor.execute(query)
-        connection.commit()
-        connection.close()
+        connection = GlobalSQL.return_connection()
+      
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(query, params)
+            connection.commit()
+        finally:
+            connection.close()
 
         self.table.PopulateTable(self.table.tree, GlobalSQL.updateDF(self.dataframe))
         self.removekey = None

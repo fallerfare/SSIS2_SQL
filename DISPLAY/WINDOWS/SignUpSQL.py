@@ -1,7 +1,7 @@
 from tkinter import ttk
 import tkinter as tk
 from DATA import GlobalSQL
-from EXCEPTIONS import Exceptions
+from EXCEPTIONS import ExceptionsSQL
 
 # ===================
 #   STUDENT WINDOW
@@ -168,9 +168,6 @@ class SignUpWindow:
     # SIGNUP   
 
     def SignUp(self):
-        
-        connection = GlobalSQL.connection()
-        cursor = GlobalSQL.cursor()
 
         try:
 
@@ -186,24 +183,25 @@ class SignUpWindow:
             # Get and clean entries
 
             # Check entries' formats
-            Exceptions.validate_inputs({
-                    "ID Number"     : (ID_number,Exceptions.IDEntry),
-                    "First Name"    : (first_name, Exceptions.NormalEntry),
-                    "Last Name"     : (last_name, Exceptions.NormalEntry),
-                    "Email"         : (email,Exceptions.EmailEntry),
-                    "Year Level"    : (year_level, Exceptions.YearEntry),
-                    "Gender"        : (gender, Exceptions.NormalEntry),
-                    "Program Code"  : (program_code, Exceptions.CodeEntry),
-                    "College Code"  : (college_code, Exceptions.CodeEntry)
+            ExceptionsSQL.validate_inputs({
+                    "ID Number"     : (ID_number,ExceptionsSQL.IDEntry),
+                    "First Name"    : (first_name, ExceptionsSQL.NormalEntry),
+                    "Last Name"     : (last_name, ExceptionsSQL.NormalEntry),
+                    "Email"         : (email,ExceptionsSQL.EmailEntry),
+                    "Year Level"    : (year_level, ExceptionsSQL.YearEntry),
+                    "Gender"        : (gender, ExceptionsSQL.NormalEntry),
+                    "Program Code"  : (program_code, ExceptionsSQL.CodeEntry),
+                    "College Code"  : (college_code, ExceptionsSQL.CodeEntry)
             })
             # Check entries' formats
 
             # If window was called by ADD Button
             if(self.WinType == "Add"):
-                Exceptions.validate_studentduplicates(ID_number)
+                ExceptionsSQL.validate_studentduplicates(ID_number)
 
-                self.newStudent = f"INSERT INTO students VALUES ({ID_number}, {first_name}, {last_name}, {email}, {year_level}, {gender}, {program_code}, {college_code})"
-                cursor.execute(self.newStudent)           
+                query = "INSERT INTO students VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                params = (ID_number, first_name, last_name, email, year_level, gender, program_code, college_code)
+
             # If window was called by ADD Button
 
             # If window was called by EDIT Button
@@ -212,20 +210,26 @@ class SignUpWindow:
                 item_values = self.table.tree.item(selected_item, "values")
                 old_ID_number = item_values[0]
 
-                Exceptions.validate_studentduplicates(ID_number, edit = True, current_id = old_ID_number)
+                ExceptionsSQL.validate_studentduplicates(ID_number, edit = True, current_id = old_ID_number)
 
-                self.editStudent = f"UPDATE students SET `ID Number` = {ID_number}, `First Name` = {first_name}, Last Name = {last_name}, `Email` = {email}, `Year Level` = {year_level}, `Gender` = {gender}, `Program Code` = {program_code}, `College Code` = {college_code}" 
-                cursor.execute(self.editStudent)
+                query = "UPDATE students SET `First Name` = %s, `Last Name` = %s, `Email` = %s, `Year Level` = %s, `Gender` = %s, `Program Code` = %s, `College Code` = %s WHERE `ID Number` = %s"
+                params = (first_name, last_name, email, year_level, gender, program_code, college_code, ID_number)
 
-            connection.commit()
-            connection.close()
+            connection = GlobalSQL.return_connection()
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(query, params)
+                connection.commit()
+            finally:
+                connection.close()
+
             self.table.PopulateTable(self.table.tree, GlobalSQL.readStudentsDF())
             self.root.destroy()
 
         except ValueError as ve:
-            Exceptions.show_inputerror_message(ve)
+            ExceptionsSQL.show_inputerror_message(ve)
         except Exception as e:
-            Exceptions.show_unexpected_error(e)
+            ExceptionsSQL.show_unexpected_error(e)
 
     # SIGNUP
     # ================

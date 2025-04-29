@@ -1,7 +1,7 @@
 from tkinter import ttk
 import tkinter as tk
 from DATA import GlobalSQL
-from EXCEPTIONS import Exceptions
+from EXCEPTIONS import ExceptionsSQL
 
 class CreateCollgWindow:
     def __init__(self, table, Wintype):
@@ -75,45 +75,50 @@ class CreateCollgWindow:
         self.root.mainloop()
 
     def CreateCollg(self):
-
-        connection = GlobalSQL.connection()
-        cursor = GlobalSQL.cursor()
-
         try:
-
             college_name = self.CollegeNameEntryBox.get().strip()
             college_code = self.CollegeCodeEntryBox.get().strip()
-            
-            Exceptions.validate_inputs({
-                                        "College Name" : (college_name, Exceptions.CollegeEntry),
-                                        "College Code" : (college_code, Exceptions.CodeEntry)
 
+            # Input validation
+            ExceptionsSQL.validate_inputs({
+                "College Name": (college_name, ExceptionsSQL.CollegeEntry),
+                "College Code": (college_code, ExceptionsSQL.CodeEntry)
             })
-            
+
             if self.WinType == "Add":
+                # Check for duplicates
+                ExceptionsSQL.validate_collegeduplicates(college_code)
 
-                Exceptions.validate_collegeduplicates(college_code)
+                # Insert safely
+                query = "INSERT INTO colleges (`College Code`, `College Name`) VALUES (%s, %s)"
+                params = (college_code, college_name)
 
-                self.newCollege = f"INSERT INTO colleges VALUES ({college_code}, {college_name})"
-                cursor.execute(self.newCollege)    
-                    
             elif self.WinType == "Edit":
-                
                 selected_item = self.table.tree.selection()
                 item_values = self.table.tree.item(selected_item, "values")
                 old_college_code = item_values[0]
-                Exceptions.validate_collegeduplicates(college_code, edit = True, current_ccode = old_college_code)
 
-                self.editCollege = f"UPDATE colleges SET `College Code` = {college_code}, `College Name` = {college_name} WHERE `College Code` = {old_college_code}" 
-                cursor.execute(self.editCollege)
+                # Validate duplicates for edit
+                ExceptionsSQL.validate_collegeduplicates(college_code, edit=True, current_ccode=old_college_code)
 
-            connection.commit()
-            connection.close()
+                query = "UPDATE colleges SET `College Name` = %s WHERE `College Code` = %s"
+                params = (college_name, old_college_code)
+
+            connection = GlobalSQL.return_connection()
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(query, params)
+                connection.commit()
+            finally:
+                connection.close()
+
+            # Refresh table
             self.table.PopulateTable(self.table.tree, GlobalSQL.readCollegesDF())
             self.root.destroy()
 
         except ValueError as ve:
-            Exceptions.show_inputerror_message(ve)
+            ExceptionsSQL.show_inputerror_message(ve)
         except Exception as e:
-            Exceptions.show_unexpected_error(e)
+            ExceptionsSQL.show_unexpected_error(e)
+
         

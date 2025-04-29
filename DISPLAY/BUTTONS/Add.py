@@ -1,5 +1,5 @@
 from tkinter import ttk
-from DISPLAY.WINDOWS import SignUp, CreateCollg, CreateProg
+from DISPLAY.WINDOWS import SignUpSQL, CreateCollgSQL, CreateProgSQL
 from DATA import GlobalSQL
 
 
@@ -16,13 +16,13 @@ class Add:
         # Format Add Button according to tab
         match dataframe.columns[0]:  
             case "ID Number":
-                command = lambda: SignUp.SignUpWindow(self.table, "Add")
+                command = lambda: SignUpSQL.SignUpWindow(self.table, "Add")
                 buttext = "Enroll New"
             case "Program Code":
-                command = lambda: CreateProg.CreateProgWindow(self.table, "Add")
+                command = lambda: CreateProgSQL.CreateProgWindow(self.table, "Add")
                 buttext = "Add Program"
             case "College Code":
-                command = lambda: CreateCollg.CreateCollgWindow(self.table, "Add")
+                command = lambda: CreateCollgSQL.CreateCollgWindow(self.table, "Add")
                 buttext = "Add College"
             case _:
                 buttext = "What, no button???"

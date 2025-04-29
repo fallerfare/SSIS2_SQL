@@ -1,19 +1,20 @@
 import pymysql
+from pymysql import cursors
 import pandas as pd
 from DATA.db_config import DB_PASSWORD, DB_DATABASE, DB_HOST, DB_USER
+
 
 #==================
 #  SETUP DATAFRAME
 # #==================
-
-connection = pymysql.connect(
-    host = f"{DB_HOST}",
-    user = f"{DB_USER}",
-    password = f"{DB_PASSWORD}",
-    database = f"{DB_DATABASE}"
-)
-
-cursor = connection.cursor()
+def return_connection():
+    return pymysql.connect(
+        host = f"{DB_HOST}",
+        user = f"{DB_USER}",
+        password = f"{DB_PASSWORD}",
+        database = f"{DB_DATABASE}",
+        cursorclass=cursors.DictCursor
+    )
 
 #==================
 #  SETUP DATAFRAME
@@ -24,17 +25,24 @@ cursor = connection.cursor()
 # READING FUNCTIONS
 #==================
 
+def returnDataframe(query, params = None):
+    connection = return_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        result = cursor.fetchall()
+        return pd.DataFrame(result)
+
 def readStudentsDF():
     students = "SELECT * FROM students"
-    return pd.read_sql(students, con = connection)
+    return returnDataframe(students)
 
 def readProgramsDF():
     programs = "SELECT * FROM programs"
-    return pd.read_sql(programs, con = connection)
+    return returnDataframe(programs)
 
 def readCollegesDF():
     colleges = "SELECT * FROM colleges"
-    return pd.read_sql(colleges, con = connection)
+    return returnDataframe(colleges)
 
 #==================
 # READING FUNCTIONS

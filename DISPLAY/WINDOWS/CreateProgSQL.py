@@ -1,7 +1,7 @@
 from tkinter import ttk
 import tkinter as tk
 from DATA import GlobalSQL
-from EXCEPTIONS import Exceptions
+from EXCEPTIONS import ExceptionsSQL
 
 # ===================
 #   PROGRAM WINDOW
@@ -89,46 +89,48 @@ class CreateProgWindow:
         self.root.mainloop()
 
     def CreateProg(self):
-
-        connection = GlobalSQL.connection()
-        cursor = GlobalSQL.cursor()
        
         try:
             program_name = self.ProgramNameEntryBox.get().strip()
             program_code = self.ProgramCodeEntryBox.get().strip()
             college_code = self.CollegeEntryBox.get().strip()
             
-            Exceptions.validate_inputs({
-                                        "Program Name" : (program_name, Exceptions.ProgramEntry),
-                                        "Program Code" : (program_code, Exceptions.CodeEntry),
-                                        "College Code" : (college_code, Exceptions.CodeEntry)
+            ExceptionsSQL.validate_inputs({
+                                        "Program Name" : (program_name, ExceptionsSQL.ProgramEntry),
+                                        "Program Code" : (program_code, ExceptionsSQL.CodeEntry),
+                                        "College Code" : (college_code, ExceptionsSQL.CodeEntry)
             })  
 
             if self.WinType == "Add":
-                Exceptions.validate_programduplicates(program_code)
+                ExceptionsSQL.validate_programduplicates(program_code)
             
-                self.newPrograms = f"INSERT INTO programs VALUES ({program_name}, {program_code}, {college_code})"
-                cursor.execute(self.newPrograms) 
+                query = "INSERT INTO programs (`Program Code`, `Program Name`, `College Code`) VALUES (%s, %s, %s)"
+                params = (program_code, program_name, college_code)
                 
             elif self.WinType == "Edit":
                 selected_item = self.table.tree.selection()
                 item_values = self.table.tree.item(selected_item, "values")
                 old_program_code = item_values[0]
-                Exceptions.validate_programduplicates(program_code, edit = True, current_pcode = old_program_code)
+                ExceptionsSQL.validate_programduplicates(program_code, edit = True, current_pcode = old_program_code)
  
-                self.editProgram = f"UPDATE programs SET `Program Code` = {program_code}, `Program Name` = {program_name}, `College Code` = {college_code} WHERE `Program Code` = {old_program_code}" 
-                cursor.execute(self.editProgram)
+                query = "UPDATE programs SET `Program Name` = %s, `College Code` = %s WHERE `Program Code` = %s"
+                params = (program_name, college_code, program_code)
 
-            connection.commit()
-            connection.close()  
+            connection = GlobalSQL.return_connection()
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(query, params)
+                connection.commit()
+            finally:
+                connection.close()
+
             self.table.PopulateTable(self.table.tree, GlobalSQL.readProgramsDF())
             self.root.destroy()
             
-        
         except ValueError as ve:
-            Exceptions.show_inputerror_message(ve)
+            ExceptionsSQL.show_inputerror_message(ve)
         except Exception as e:
-            Exceptions.show_unexpected_error(e)
+            ExceptionsSQL.show_unexpected_error(e)
 # ===================
 #   PROGRAM WINDOW
 # ===================
